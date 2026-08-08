@@ -21,7 +21,19 @@
             align-items: center;
             min-height: 100vh;
             overflow-x: hidden;
+            perspective: 1000px; /* For 3D Card Effect */
         }
+
+        /* --- ENTRANCE ANIMATIONS --- */
+        @keyframes fadeInUp {
+            0% { opacity: 0; transform: translateY(30px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+        .animate-up { opacity: 0; animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        .delay-1 { animation-delay: 0.1s; }
+        .delay-2 { animation-delay: 0.2s; }
+        .delay-3 { animation-delay: 0.3s; }
+        .delay-4 { animation-delay: 0.4s; }
 
         /* --- BACKGROUND ARC ANIMATIONS --- */
         .arc-bg-animation {
@@ -44,30 +56,30 @@
 
         .ring1 {
             width: 90vw; height: 90vw;
-            border-top: 2px solid rgba(0, 113, 227, 0.15); /* Arc Blue */
+            border-top: 2px solid rgba(0, 113, 227, 0.15);
             border-right: 2px solid rgba(0, 113, 227, 0.05);
-            animation: rotateArc 30s linear infinite;
+            animation: rotateArc 25s linear infinite;
         }
 
         .ring2 {
             width: 65vw; height: 65vw;
-            border-bottom: 2px solid rgba(0, 212, 255, 0.25); /* Cyan Arc */
+            border-bottom: 2px dashed rgba(0, 212, 255, 0.3); /* Dashed for extra motion */
             border-left: 2px solid rgba(0, 212, 255, 0.1);
-            animation: rotateArc 20s linear infinite reverse;
+            animation: rotateArc 15s linear infinite reverse;
         }
 
         .ring3 {
             width: 40vw; height: 40vw;
             border-top: 3px solid rgba(0, 113, 227, 0.3);
             border-right: 3px solid rgba(0, 212, 255, 0.2);
-            animation: rotateArc 15s linear infinite;
+            animation: rotateArc 10s ease-in-out infinite alternate; /* Breathing effect */
         }
 
         @keyframes rotateArc {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            0% { transform: rotate(0deg) scale(1); }
+            50% { transform: rotate(180deg) scale(1.02); }
+            100% { transform: rotate(360deg) scale(1); }
         }
-        /* --------------------------------- */
 
         /* Top Navigation */
         nav {
@@ -95,14 +107,14 @@
             font-size: 14px;
             font-weight: 500;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
         }
-        .connect-btn:hover { background: #333333; transform: scale(1.02); }
+        .connect-btn:hover { background: #333333; transform: scale(1.05) translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
 
         /* Main Card */
         .main-container {
             margin-top: 140px;
-            background: rgba(255, 255, 255, 0.85); /* Slightly transparent to see arcs behind */
+            background: rgba(255, 255, 255, 0.85); 
             backdrop-filter: blur(20px);
             width: 100%;
             max-width: 480px;
@@ -112,10 +124,18 @@
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0,0,0,0.05);
             text-align: center;
             z-index: 10;
+            transform-style: preserve-3d;
+            transition: transform 0.1s ease-out, box-shadow 0.5s ease;
         }
 
-        h1 { font-size: 28px; font-weight: 600; margin-bottom: 10px; letter-spacing: -0.5px; }
-        p.subtitle { color: #86868b; font-size: 15px; margin-bottom: 30px; line-height: 1.5; }
+        /* Success Pulse Glow */
+        .success-glow {
+            box-shadow: 0 0 50px rgba(52, 199, 89, 0.4), 0 20px 40px rgba(0, 0, 0, 0.08) !important;
+            border-color: rgba(52, 199, 89, 0.5) !important;
+        }
+
+        h1 { font-size: 28px; font-weight: 600; margin-bottom: 10px; letter-spacing: -0.5px; transform: translateZ(20px); }
+        p.subtitle { color: #86868b; font-size: 15px; margin-bottom: 30px; line-height: 1.5; transform: translateZ(15px); }
 
         /* Upload Zone */
         .upload-area {
@@ -130,27 +150,31 @@
             align-items: center;
             justify-content: center;
             margin-bottom: 20px;
+            transform: translateZ(30px);
         }
 
         .upload-area:hover, .upload-area.dragover {
             border-color: #0071e3;
             background: rgba(0, 113, 227, 0.05);
+            transform: translateZ(35px) scale(1.02);
         }
 
         .upload-area input { display: none; }
-        .upload-icon { font-size: 24px; margin-bottom: 10px; color: #0071e3; }
+        .upload-icon { font-size: 24px; margin-bottom: 10px; color: #0071e3; transition: 0.3s; }
+        .upload-area:hover .upload-icon { transform: translateY(-5px); }
         .upload-text { font-size: 15px; font-weight: 500; color: #1d1d1f; }
         .upload-hint { font-size: 13px; color: #86868b; margin-top: 5px; }
 
         /* Preview Container */
-        #preview-container { display: none; margin-bottom: 20px; position: relative; }
+        #preview-container { display: none; margin-bottom: 20px; position: relative; transform: translateZ(30px); }
         
         #imagePreview {
             width: 100%;
             max-height: 250px;
             object-fit: cover;
             border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+            animation: fadeInUp 0.5s ease-out;
         }
 
         /* Cancel Selection Button */
@@ -167,10 +191,11 @@
             font-size: 16px;
             font-weight: bold;
             cursor: pointer;
-            box-shadow: 0 2px 8px rgba(255, 59, 48, 0.4);
-            transition: 0.2s;
+            box-shadow: 0 4px 12px rgba(255, 59, 48, 0.4);
+            transition: 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            z-index: 5;
         }
-        .cancel-btn:hover { transform: scale(1.1); }
+        .cancel-btn:hover { transform: scale(1.2) rotate(90deg); }
 
         /* Action Button */
         .mint-btn {
@@ -183,12 +208,29 @@
             font-size: 16px;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: all 0.3s ease;
+            transform: translateZ(20px);
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
-        .mint-btn:hover { background: #0077ed; box-shadow: 0 4px 15px rgba(0, 113, 227, 0.3); }
+        .mint-btn:hover { background: #0077ed; box-shadow: 0 8px 25px rgba(0, 113, 227, 0.4); transform: translateZ(25px) translateY(-2px); }
+        
+        /* CSS Loader Spinner */
+        .loader {
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            display: none;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
 
-        #status { margin-top: 20px; font-size: 14px; font-weight: 500; color: #86868b; }
+        #status { margin-top: 20px; font-size: 14px; font-weight: 500; color: #86868b; transform: translateZ(10px); }
     </style>
 </head>
 <body>
@@ -201,18 +243,18 @@
     </div>
 
     <!-- Top Navigation -->
-    <nav>
+    <nav class="animate-up">
         <div class="logo">Arc Matrix</div>
         <button class="connect-btn" id="connectWalletBtn" onclick="connectWallet()">Connect Wallet</button>
     </nav>
 
     <!-- Main Minting Card -->
-    <div class="main-container">
-        <h1>Mint Your Masterpiece</h1>
-        <p class="subtitle">Secure your physical sketches and digital assets on the Arc blockchain forever.</p>
+    <div class="main-container animate-up delay-1" id="mainCard">
+        <h1 class="animate-up delay-2">Mint Your Masterpiece</h1>
+        <p class="subtitle animate-up delay-2">Secure your physical sketches and digital assets on the Arc blockchain forever.</p>
 
         <!-- Drag & Drop Zone -->
-        <label class="upload-area" id="dropzone" for="fileInput">
+        <label class="upload-area animate-up delay-3" id="dropzone" for="fileInput">
             <div class="upload-icon">✦</div>
             <div class="upload-text">Click or drag image here</div>
             <div class="upload-hint">High-res JPG or PNG</div>
@@ -225,8 +267,12 @@
             <img id="imagePreview" alt="Artwork Preview">
         </div>
 
-        <button class="mint-btn" id="mintBtn" onclick="mintNFT()">Mint to Arc</button>
-        <div id="status">Ready when you are.</div>
+        <button class="mint-btn animate-up delay-4" id="mintBtn" onclick="mintNFT()">
+            <span id="btnText">Mint to Arc</span>
+            <div class="loader" id="btnLoader"></div>
+        </button>
+        
+        <div id="status" class="animate-up delay-4">Ready when you are.</div>
     </div>
 
     <script>
@@ -239,7 +285,21 @@
         let provider = null;
         let signer = null;
 
-        // --- 2. CONNECT WALLET LOGIC ---
+        // --- 3D CARD HOVER EFFECT ---
+        const card = document.getElementById('mainCard');
+        document.addEventListener('mousemove', (e) => {
+            // Screen tracking for subtle 3D tilt
+            let xAxis = (window.innerWidth / 2 - e.pageX) / 60;
+            let yAxis = (window.innerHeight / 2 - e.pageY) / 60;
+            card.style.transform = `perspective(1000px) rotateY(${xAxis}deg) rotateX(${yAxis}deg)`;
+        });
+
+        // Ensure card resets when mouse leaves window
+        document.addEventListener('mouseleave', () => {
+            card.style.transform = `perspective(1000px) rotateY(0deg) rotateX(0deg)`;
+        });
+
+        // --- CONNECT WALLET LOGIC ---
         async function connectWallet() {
             const connectBtn = document.getElementById('connectWalletBtn');
             const statusText = document.getElementById('status');
@@ -268,7 +328,7 @@
             }
         }
 
-        // --- 3. DRAG & DROP AND CANCEL LOGIC ---
+        // --- DRAG & DROP LOGIC ---
         const dropzone = document.getElementById('dropzone');
         const fileInput = document.getElementById('fileInput');
         const previewContainer = document.getElementById('preview-container');
@@ -304,6 +364,7 @@
                     dropzone.style.display = 'none';
                     previewContainer.style.display = 'block';
                     statusText.innerText = "Image selected. Ready to mint.";
+                    card.classList.remove('success-glow'); // Reset glow if minting again
                 }
                 reader.readAsDataURL(file);
             }
@@ -314,10 +375,14 @@
             previewContainer.style.display = 'none';
             dropzone.style.display = 'flex';
             statusText.innerText = "Image removed. Select a new one.";
+            card.classList.remove('success-glow');
         }
 
-        // --- 4. MINTING LOGIC ---
+        // --- MINTING LOGIC ---
         async function mintNFT() {
+            const btnText = document.getElementById('btnText');
+            const btnLoader = document.getElementById('btnLoader');
+
             if (!fileInput.files.length) {
                 statusText.innerText = "Please select an image first.";
                 statusText.style.color = "#ff3b30";
@@ -331,8 +396,11 @@
             }
 
             try {
+                // UI Loading State
                 statusText.style.color = "#86868b";
                 statusText.innerText = "Please confirm the transaction in MetaMask...";
+                btnText.style.display = 'none';
+                btnLoader.style.display = 'block';
                 
                 const contract = new ethers.Contract(contractAddress, contractABI, signer);
                 const tx = await contract.mintNFT(userWalletAddress);
@@ -340,12 +408,19 @@
                 statusText.innerText = "Minting in progress... Please wait.";
                 await tx.wait();
                 
+                // UI Success State
                 statusText.innerText = "🎉 Masterpiece Successfully Minted to Arc Network!";
                 statusText.style.color = "#34c759";
+                btnText.style.display = 'block';
+                btnLoader.style.display = 'none';
+                card.classList.add('success-glow'); // Add neon green pulse
+
             } catch (error) {
                 console.error(error);
                 statusText.innerText = "Transaction failed or rejected.";
                 statusText.style.color = "#ff3b30";
+                btnText.style.display = 'block';
+                btnLoader.style.display = 'none';
             }
         }
     </script>
