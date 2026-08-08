@@ -3,224 +3,154 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Arc Multiverse - Pro Terminal</title>
+    <title>Classic Art Studio</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@500;700&display=swap');
-
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        /* Classic Elegant Fonts */
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Lato:wght@300;400&display=swap');
         
-        body { 
-            background: #020205; 
-            color: #fff; 
-            font-family: 'Rajdhani', sans-serif; 
-            overflow: hidden; 
-            height: 100vh; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            perspective: 1200px; /* 3D Perspective */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body {
+            background-color: #f7f7f5; /* Soft canvas white */
+            color: #222;
+            font-family: 'Lato', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
         }
 
-        /* Interactive Canvas Background */
-        #nodeCanvas {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 0;
-            opacity: 0.6;
-        }
-
-        /* Scanline Overlay */
-        .scanlines {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0, 112, 243, 0.05) 50%, rgba(0, 112, 243, 0.05));
-            background-size: 100% 4px;
-            z-index: 1;
-            pointer-events: none;
-        }
-
-        /* 3D Glass Card */
-        .tilt-card {
+        /* The Premium Frame */
+        .gallery-frame {
+            background: #ffffff;
+            padding: 50px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.05);
+            max-width: 500px;
+            width: 90%;
             position: relative;
-            z-index: 10;
-            width: 450px;
-            background: rgba(10, 15, 30, 0.6);
-            backdrop-filter: blur(15px);
-            border: 1px solid rgba(0, 212, 255, 0.2);
-            border-radius: 16px;
-            padding: 35px;
-            box-shadow: 0 0 40px rgba(0, 112, 243, 0.2), inset 0 0 20px rgba(0, 212, 255, 0.05);
-            transform-style: preserve-3d;
-            transition: transform 0.1s ease, box-shadow 0.1s ease;
         }
 
-        /* Card Inner Glow */
-        .tilt-card::before {
-            content: "";
+        /* Inner subtle border like an art frame */
+        .gallery-frame::before {
+            content: '';
             position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            border-radius: 16px;
-            background: radial-gradient(circle at 50% 0%, rgba(0, 212, 255, 0.3), transparent 60%);
+            top: 8px; left: 8px; right: 8px; bottom: 8px;
+            border: 1px solid #eee;
             pointer-events: none;
-            transform: translateZ(20px);
         }
 
-        h1 { 
-            font-family: 'Orbitron', sans-serif; 
-            font-size: 26px; 
-            text-align: center; 
-            margin-bottom: 5px; 
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            color: #00d4ff;
-            text-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
-            transform: translateZ(30px);
+        h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 32px;
+            text-align: center;
+            margin-bottom: 8px;
+            color: #111;
+            letter-spacing: 1px;
         }
 
         p.subtitle {
             text-align: center;
-            color: #8c9eff;
+            color: #888;
+            margin-bottom: 35px;
             font-size: 14px;
-            margin-bottom: 25px;
-            transform: translateZ(20px);
+            font-style: italic;
+            font-family: 'Playfair Display', serif;
         }
 
-        /* Advanced Dropzone */
-        .dropzone {
-            border: 2px dashed rgba(0, 212, 255, 0.4);
-            border-radius: 12px;
-            padding: 30px 20px;
+        /* Elegant Dropzone */
+        .upload-area {
+            border: 1px solid #ddd;
+            padding: 40px 20px;
             text-align: center;
             cursor: pointer;
-            background: rgba(0, 0, 0, 0.4);
+            transition: all 0.4s ease;
+            background: #fafafa;
+            margin-bottom: 30px;
             position: relative;
-            overflow: hidden;
-            transition: all 0.3s ease;
-            transform: translateZ(40px);
-            margin-bottom: 25px;
         }
 
-        .dropzone:hover, .dropzone.dragover {
-            border-color: #00d4ff;
-            background: rgba(0, 212, 255, 0.1);
-            box-shadow: 0 0 20px rgba(0, 212, 255, 0.2) inset;
+        .upload-area:hover, .upload-area.dragover {
+            background: #f0f0f0;
+            border-color: #aaa;
         }
 
-        .dropzone input { display: none; }
+        .upload-area input { display: none; }
         
-        .upload-icon { font-size: 30px; margin-bottom: 10px; display: block; }
-        
+        .upload-area span { 
+            color: #555; 
+            font-size: 13px; 
+            letter-spacing: 2px; 
+            text-transform: uppercase; 
+        }
+
         #imagePreview {
             max-width: 100%;
-            max-height: 220px;
-            border-radius: 8px;
-            margin-top: 15px;
+            max-height: 280px;
+            margin-top: 20px;
             display: none;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-            border: 1px solid rgba(0, 212, 255, 0.3);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.15);
         }
 
-        /* Cyber Button */
-        .cyber-btn {
+        /* Minimalist Button */
+        button {
             width: 100%;
-            background: linear-gradient(45deg, #0070f3, #00d4ff);
+            background: #111;
             color: #fff;
             border: none;
             padding: 16px;
-            font-family: 'Orbitron', sans-serif;
-            font-size: 16px;
-            font-weight: bold;
-            letter-spacing: 1px;
-            border-radius: 8px;
-            cursor: pointer;
+            font-size: 14px;
+            letter-spacing: 3px;
             text-transform: uppercase;
-            box-shadow: 0 0 15px rgba(0, 112, 243, 0.5);
-            transition: all 0.3s;
-            transform: translateZ(35px);
-            position: relative;
-            overflow: hidden;
+            cursor: pointer;
+            transition: background 0.3s, transform 0.2s;
+            font-family: 'Lato', sans-serif;
+            font-weight: bold;
         }
 
-        .cyber-btn::after {
-            content: '';
-            position: absolute;
-            top: -50%; left: -50%; width: 200%; height: 200%;
-            background: rgba(255,255,255,0.1);
-            transform: rotate(45deg) translateY(-100%);
-            transition: 0.5s;
+        button:hover { 
+            background: #333; 
+            transform: translateY(-2px);
         }
 
-        .cyber-btn:hover::after { transform: rotate(45deg) translateY(100%); }
-        .cyber-btn:hover { box-shadow: 0 0 25px rgba(0, 212, 255, 0.8); }
-
-        /* Hacker Terminal Log */
-        .terminal {
-            margin-top: 20px;
-            background: rgba(0, 0, 0, 0.7);
-            border-left: 3px solid #00d4ff;
-            padding: 12px;
-            border-radius: 4px;
-            font-family: monospace;
+        #status {
+            margin-top: 25px;
+            text-align: center;
             font-size: 13px;
-            color: #00d4ff;
-            min-height: 45px;
-            transform: translateZ(25px);
-            display: flex;
-            align-items: center;
+            color: #666;
+            letter-spacing: 1px;
+            min-height: 20px;
+            text-transform: uppercase;
         }
-
-        .blink { animation: blink 1s infinite; }
-        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
     </style>
 </head>
 <body>
 
-    <!-- Dynamic Background -->
-    <canvas id="nodeCanvas"></canvas>
-    <div class="scanlines"></div>
+    <div class="gallery-frame">
+        <h1>The Classic Studio</h1>
+        <p class="subtitle">Preserving traditional art on the blockchain</p>
 
-    <!-- UI Card -->
-    <div class="tilt-card" id="card">
-        <h1>Arc Minting Matrix</h1>
-        <p class="subtitle">Secure Digital Assets on L2 Network</p>
-
-        <label class="dropzone" id="dropzone" for="fileInput">
-            <span class="upload-icon">💠</span>
-            <span id="uploadText">Initialize Upload Protocol<br><small>(Drag & Drop or Click)</small></span>
+        <label class="upload-area" id="dropzone" for="fileInput">
+            <span id="uploadText">Click or Drop Artwork Here</span>
             <input type="file" id="fileInput" accept="image/*">
-            <img id="imagePreview" alt="Asset Preview">
+            <img id="imagePreview" alt="Artwork Preview">
         </label>
 
-        <button class="cyber-btn" onclick="mintNFT()">Execute Mint_</button>
+        <button onclick="mintNFT()">Mint to Collection</button>
         
-        <div class="terminal">
-            <span id="statusText">System Ready. Awaiting input.</span><span class="blink">_</span>
-        </div>
+        <div id="status">Ready to Mint</div>
     </div>
 
     <script>
-        // --- 1. SET YOUR CONTRACT ADDRESS HERE ---
+        // --- APNA CONTRACT ADDRESS YAHAN DAALEIN ---
         const contractAddress = "0x27dAF01a62674d66bC17019A554db1E07580168C";
         const contractABI = ["function mintNFT(address to) public"];
 
-        // --- 2. 3D TILT EFFECT LOGIC ---
-        const card = document.getElementById('card');
-        document.addEventListener('mousemove', (e) => {
-            const xAxis = (window.innerWidth / 2 - e.pageX) / 25;
-            const yAxis = (window.innerHeight / 2 - e.pageY) / 25;
-            card.style.transform = `rotateY(${xAxis}deg) rotateX(${yAxis}deg)`;
-        });
-
-        // --- 3. DRAG & DROP AND PREVIEW LOGIC ---
+        // --- DRAG & DROP LOGIC ---
         const dropzone = document.getElementById('dropzone');
         const fileInput = document.getElementById('fileInput');
         const imagePreview = document.getElementById('imagePreview');
         const uploadText = document.getElementById('uploadText');
-        const uploadIcon = document.querySelector('.upload-icon');
 
         ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
             dropzone.addEventListener(eventName, preventDefaults, false);
@@ -254,45 +184,28 @@
                     imagePreview.src = e.target.result;
                     imagePreview.style.display = 'block';
                     uploadText.style.display = 'none';
-                    uploadIcon.style.display = 'none';
-                    typeWriter("Image protocol loaded. Ready to deploy.");
+                    document.getElementById('status').innerText = "Artwork loaded.";
                 }
                 reader.readAsDataURL(file);
             }
         }
 
-        // --- 4. TERMINAL TYPING EFFECT ---
-        let i = 0;
-        let typingTimer;
-        function typeWriter(text) {
-            const statusEl = document.getElementById('statusText');
-            clearInterval(typingTimer);
-            statusEl.innerHTML = "";
-            let charIndex = 0;
-            typingTimer = setInterval(() => {
-                if (charIndex < text.length) {
-                    statusEl.innerHTML += text.charAt(charIndex);
-                    charIndex++;
-                } else {
-                    clearInterval(typingTimer);
-                }
-            }, 30);
-        }
-
-        // --- 5. MINTING LOGIC (WEB3) ---
+        // --- MINTING LOGIC ---
         async function mintNFT() {
+            const statusText = document.getElementById('status');
+
             if (!fileInput.files.length) {
-                typeWriter("ERR: No visual asset detected.");
+                statusText.innerText = "Please upload an artwork first.";
                 return;
             }
 
             if (typeof window.ethereum === 'undefined') {
-                typeWriter("ERR: MetaMask node disconnected.");
+                statusText.innerText = "MetaMask not detected.";
                 return;
             }
 
             try {
-                typeWriter("Connecting to MetaMask gateway...");
+                statusText.innerText = "Connecting to MetaMask...";
                 await window.ethereum.request({ method: 'eth_requestAccounts' });
                 
                 const provider = new ethers.providers.Web3Provider(window.ethereum);
@@ -300,104 +213,19 @@
                 const userAddress = await signer.getAddress();
                 const contract = new ethers.Contract(contractAddress, contractABI, signer);
 
-                typeWriter("Awaiting user signature in MetaMask...");
+                statusText.innerText = "Please confirm in MetaMask...";
                 
                 const tx = await contract.mintNFT(userAddress);
                 
-                typeWriter(`Tx broadcasted. Indexing block...`);
+                statusText.innerText = "Securing on Blockchain. Please wait...";
                 await tx.wait();
                 
-                typeWriter("SUCCESS: NFT Minted to Arc Matrix! ⬛");
+                statusText.innerText = "Masterpiece Successfully Minted.";
             } catch (error) {
                 console.error(error);
-                typeWriter("ERR: Operation aborted or failed.");
+                statusText.innerText = "Transaction Cancelled or Failed.";
             }
         }
-
-        // --- 6. BACKGROUND PARTICLE NETWORK SYSTEM ---
-        const canvas = document.getElementById("nodeCanvas");
-        const ctx = canvas.getContext("2d");
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-
-        let particlesArray = [];
-        const mouse = { x: null, y: null, radius: 150 };
-
-        window.addEventListener('mousemove', (e) => {
-            mouse.x = e.x;
-            mouse.y = e.y;
-        });
-
-        class Particle {
-            constructor() {
-                this.x = Math.random() * canvas.width;
-                this.y = Math.random() * canvas.height;
-                this.size = Math.random() * 2 + 1;
-                this.speedX = Math.random() * 1 - 0.5;
-                this.speedY = Math.random() * 1 - 0.5;
-            }
-            update() {
-                this.x += this.speedX;
-                this.y += this.speedY;
-                if(this.x > canvas.width || this.x < 0) this.speedX = -this.speedX;
-                if(this.y > canvas.height || this.y < 0) this.speedY = -this.speedY;
-                
-                let dx = mouse.x - this.x;
-                let dy = mouse.y - this.y;
-                let distance = Math.sqrt(dx*dx + dy*dy);
-                if (distance < mouse.radius) {
-                    this.x -= dx/20;
-                    this.y -= dy/20;
-                }
-            }
-            draw() {
-                ctx.fillStyle = 'rgba(0, 212, 255, 0.8)';
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                ctx.fill();
-            }
-        }
-
-        function init() {
-            particlesArray = [];
-            let numberOfParticles = (canvas.height * canvas.width) / 9000;
-            for (let i = 0; i < numberOfParticles; i++) {
-                particlesArray.push(new Particle());
-            }
-        }
-
-        function animate() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            for (let i = 0; i < particlesArray.length; i++) {
-                particlesArray[i].update();
-                particlesArray[i].draw();
-                
-                // Draw lines between close particles
-                for (let j = i; j < particlesArray.length; j++) {
-                    let dx = particlesArray[i].x - particlesArray[j].x;
-                    let dy = particlesArray[i].y - particlesArray[j].y;
-                    let distance = Math.sqrt(dx * dx + dy * dy);
-                    if (distance < 100) {
-                        ctx.beginPath();
-                        ctx.strokeStyle = `rgba(0, 112, 243, ${1 - distance/100})`;
-                        ctx.lineWidth = 1;
-                        ctx.moveTo(particlesArray[i].x, particlesArray[i].y);
-                        ctx.lineTo(particlesArray[j].x, particlesArray[j].y);
-                        ctx.stroke();
-                    }
-                }
-            }
-            requestAnimationFrame(animate);
-        }
-
-        window.addEventListener('resize', () => {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-            init();
-        });
-
-        init();
-        animate();
     </script>
 </body>
 </html>
