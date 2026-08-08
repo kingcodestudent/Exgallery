@@ -3,36 +3,95 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Art Collection</title>
-    <!-- Ye line Web3 (Ethers.js) ko connect karti hai -->
+    <title>Arc Multiverse Gallery</title>
+    <!-- Web3 Ethers.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-align: center; background: #f4f4f9; padding: 50px; color: #333; }
-        .card { background: white; padding: 40px; border-radius: 15px; box-shadow: 0 10px 20px rgba(0,0,0,0.1); display: inline-block; max-width: 600px; }
-        h1 { color: #111; }
-        p { font-size: 18px; color: #666; line-height: 1.6; }
-        button { background: #0070f3; color: white; border: none; padding: 15px 30px; border-radius: 8px; cursor: pointer; font-size: 18px; font-weight: bold; margin-top: 20px; transition: 0.3s; }
-        button:hover { background: #005bb5; box-shadow: 0 5px 15px rgba(0,112,243,0.4); }
-        #status { margin-top: 20px; font-weight: bold; color: green; }
+        /* Base Dark Theme */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #050510; color: #fff; overflow: hidden; height: 100vh; display: flex; justify-content: center; align-items: center; }
+        
+        /* Arc Animated Background */
+        .background-animation { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; overflow: hidden; }
+        .arc-circle { position: absolute; border-radius: 50%; border: 2px solid rgba(0, 112, 243, 0.1); border-top-color: #0070f3; animation: spin infinite linear; }
+        .arc-1 { width: 40vw; height: 40vw; top: -10vw; left: -10vw; animation-duration: 12s; border-top-color: #00d4ff; }
+        .arc-2 { width: 60vw; height: 60vw; bottom: -20vw; right: -20vw; animation-duration: 18s; animation-direction: reverse; }
+        .arc-3 { width: 25vw; height: 25vw; top: 40%; left: 60%; animation-duration: 8s; border-top-color: #ff007a; }
+        
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
+
+        /* Glassmorphism Card Design */
+        .card { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1); padding: 40px; border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.5); text-align: center; max-width: 500px; width: 90%; animation: float 6s ease-in-out infinite; z-index: 10; }
+        h1 { font-size: 28px; margin-bottom: 10px; background: -webkit-linear-gradient(#0070f3, #00d4ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        p { color: #aaa; margin-bottom: 20px; font-size: 14px; }
+        
+        /* Image Upload Section */
+        .upload-box { border: 2px dashed rgba(255,255,255,0.3); border-radius: 12px; padding: 25px; cursor: pointer; transition: 0.3s; margin-bottom: 25px; display: block; }
+        .upload-box:hover { border-color: #00d4ff; background: rgba(0, 212, 255, 0.05); }
+        input[type="file"] { display: none; }
+        .upload-label { cursor: pointer; color: #00d4ff; font-weight: bold; font-size: 16px; }
+        #imagePreview { max-width: 100%; border-radius: 10px; margin-top: 15px; display: none; max-height: 250px; object-fit: cover; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+
+        /* Mint Button & Status */
+        button { background: linear-gradient(90deg, #0070f3, #00d4ff); color: white; border: none; padding: 15px 30px; border-radius: 30px; cursor: pointer; font-size: 16px; font-weight: bold; width: 100%; transition: 0.3s; box-shadow: 0 5px 15px rgba(0,112,243,0.4); }
+        button:hover { transform: scale(1.05); box-shadow: 0 8px 25px rgba(0,112,243,0.6); }
+        #status { margin-top: 20px; font-weight: bold; color: #00d4ff; font-size: 14px; }
     </style>
 </head>
 <body>
+    <!-- Arc Moving Background Elements -->
+    <div class="background-animation">
+        <div class="arc-circle arc-1"></div>
+        <div class="arc-circle arc-2"></div>
+        <div class="arc-circle arc-3"></div>
+    </div>
+
     <div class="card">
-        <h1>My Digital Art Gallery</h1>
-        <p>Welcome to my Multiverse Gallery. This collection features my hand-drawn physical sketches alongside high-resolution digital assets, all secured on the Arc blockchain.</p>
+        <h1>Arc Multiverse Gallery</h1>
+        <p>Upload your artwork & secure it permanently on the Arc Blockchain.</p>
+        
+        <!-- Upload Area -->
+        <label class="upload-box" for="fileInput">
+            <span class="upload-label" id="uploadText">📁 Click to Upload Art (PNG, JPG)</span>
+            <input type="file" id="fileInput" accept="image/*" onchange="previewImage(event)">
+            <img id="imagePreview" alt="Art Preview">
+        </label>
+
         <button id="mintButton" onclick="mintNFT()">Mint NFT</button>
         <p id="status"></p>
     </div>
 
     <script>
-        // 1. Apna contract address yahan daalein!
+        // YAHAN APNA REMIX WALA CONTRACT ADDRESS DALEIN 👇
         const contractAddress = "0x27dAF01a62674d66bC17019A554db1E07580168C";
-
-        // 2. Contract ko samajhne ke liye ABI
+        
         const contractABI = ["function mintNFT(address to) public"];
 
+        // Image Preview Ka Logic
+        function previewImage(event) {
+            const reader = new FileReader();
+            reader.onload = function() {
+                const output = document.getElementById('imagePreview');
+                output.src = reader.result;
+                output.style.display = 'block';
+                document.getElementById('uploadText').innerText = "✅ Image Ready for Minting!";
+            };
+            if(event.target.files[0]) {
+                reader.readAsDataURL(event.target.files[0]);
+            }
+        }
+
+        // Minting Ka Logic
         async function mintNFT() {
             const statusText = document.getElementById("status");
+            const fileInput = document.getElementById("fileInput");
+
+            // Check if image is uploaded
+            if (!fileInput.value) {
+                alert("Please upload an image first!");
+                return;
+            }
 
             if (typeof window.ethereum === 'undefined') {
                 alert("Please install MetaMask to mint NFTs!");
@@ -40,27 +99,25 @@
             }
 
             try {
-                statusText.innerText = "MetaMask connect ho raha hai...";
+                statusText.innerText = "MetaMask connect ho raha hai... ⚡";
                 await window.ethereum.request({ method: 'eth_requestAccounts' });
                 
                 const provider = new ethers.providers.Web3Provider(window.ethereum);
                 const signer = provider.getSigner();
                 const userAddress = await signer.getAddress();
-
                 const contract = new ethers.Contract(contractAddress, contractABI, signer);
 
-                statusText.innerText = "Transaction aa rahi hai... MetaMask mein Confirm karein!";
+                statusText.innerText = "Transaction aayi hai! MetaMask mein Confirm karein... ⏳";
                 
-                // Smart contract ko call kar rahe hain
                 const tx = await contract.mintNFT(userAddress);
                 
-                statusText.innerText = "Blockchain par save ho raha hai... Thoda wait karein.";
+                statusText.innerText = "Arc Blockchain par save ho raha hai... 🌐";
                 await tx.wait();
                 
-                statusText.innerText = "Badhai ho! Aapki NFT successfully mint ho gayi! 🎉";
+                statusText.innerText = "Badhai ho! Aapki Art successfully Mint ho gayi! 🎉";
             } catch (error) {
                 console.error(error);
-                statusText.innerText = "Koi error aayi hai. MetaMask check karein.";
+                statusText.innerText = "Transaction fail ho gayi ya cancel ki gayi. ❌";
             }
         }
     </script>
