@@ -3,762 +3,305 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Arc Matrix - 2D Web3 RPG</title>
+    <title>Arc Matrix Gallery</title>
+    <!-- Web3 Ethers.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+    <!-- Arc.io Font (Inter) -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
     <style>
-        /* =========================================
-           CSS ENGINE - MASSIVE UI & STYLING
-           ========================================= */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            user-select: none;
-        }
-
-        body {
-            background-color: #050510;
-            color: #fff;
-            font-family: 'VT323', monospace;
-            overflow: hidden;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-        }
-
-        #game-container {
-            position: relative;
-            width: 1024px;
-            height: 768px;
-            background: #000;
-            border: 4px solid #333;
-            box-shadow: 0 0 50px rgba(0, 212, 255, 0.2);
-            overflow: hidden;
-        }
-
-        canvas {
-            display: block;
-            image-rendering: pixelated; /* Retro aesthetic */
-        }
-
-        /* --- UI Overlays --- */
-        #ui-layer {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 10;
-        }
-
-        .hud-box {
-            position: absolute;
-            background: rgba(0, 0, 0, 0.8);
-            border: 2px solid #00d4ff;
-            padding: 15px;
-            border-radius: 8px;
-            pointer-events: auto;
-            color: #fff;
-            text-shadow: 2px 2px 0px #000;
-        }
-
-        #player-stats {
-            top: 20px;
-            left: 20px;
-            width: 250px;
-            font-size: 20px;
-        }
-
-        .health-bar-bg {
-            width: 100%;
-            height: 15px;
-            background: #333;
-            border: 1px solid #fff;
-            margin-top: 10px;
-        }
-
-        .health-bar-fill {
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, #ff007a, #ff4d4d);
-            transition: width 0.3s;
-        }
-
-        /* --- Dialogue Box System --- */
-        #dialogue-box {
-            position: absolute;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 80%;
-            height: 150px;
-            background: linear-gradient(180deg, rgba(0,0,10,0.9) 0%, rgba(0,30,60,0.95) 100%);
-            border: 4px solid #fff;
-            border-radius: 12px;
-            padding: 20px;
-            display: none;
-            pointer-events: auto;
-            box-shadow: 0 10px 30px rgba(0, 212, 255, 0.3);
-        }
-
-        #dialogue-name {
-            font-family: 'Press Start 2P', cursive;
-            font-size: 14px;
-            color: #00d4ff;
-            margin-bottom: 10px;
-            text-transform: uppercase;
-        }
-
-        #dialogue-text {
-            font-size: 24px;
-            line-height: 1.4;
-            letter-spacing: 1px;
-        }
-
-        .blinking-cursor {
-            animation: blink 1s infinite;
-        }
-
-        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
-
-        /* --- Web3 Minting Terminal --- */
-        #mint-terminal {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 600px;
-            background: rgba(5, 5, 15, 0.95);
-            border: 2px solid #00d4ff;
-            padding: 40px;
-            display: none;
-            flex-direction: column;
-            pointer-events: auto;
-            box-shadow: 0 0 100px rgba(0, 212, 255, 0.5);
-            backdrop-filter: blur(10px);
-        }
-
-        .terminal-header {
-            font-family: 'Press Start 2P', cursive;
-            font-size: 18px;
-            color: #00d4ff;
-            text-align: center;
-            margin-bottom: 30px;
-            border-bottom: 2px dashed #333;
-            padding-bottom: 15px;
-        }
-
-        .upload-zone {
-            border: 2px dashed rgba(255, 255, 255, 0.4);
-            height: 150px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
-            margin-bottom: 20px;
-            transition: 0.3s;
-            font-size: 22px;
-        }
-
-        .upload-zone:hover {
-            background: rgba(0, 212, 255, 0.1);
-            border-color: #00d4ff;
-        }
-
-        .upload-zone input { display: none; }
+        /* Arc.io Premium Aesthetic */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
         
-        #art-preview {
-            max-width: 100%;
-            max-height: 140px;
-            display: none;
+        body {
+            background-color: #f5f5f7; /* Soft Apple/Arc gray background */
+            color: #1d1d1f;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
         }
 
-        .btn-action {
-            background: #00d4ff;
-            color: #000;
-            font-family: 'Press Start 2P', cursive;
-            font-size: 14px;
+        /* Top Navigation */
+        nav {
+            width: 100%;
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid #e5e5ea;
+            position: fixed;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo { font-size: 20px; font-weight: 700; letter-spacing: -0.5px; }
+        
+        .connect-btn {
+            background: #000000;
+            color: #ffffff;
             border: none;
-            padding: 15px;
+            padding: 10px 20px;
+            border-radius: 20px; /* Pill shape */
+            font-size: 14px;
+            font-weight: 500;
             cursor: pointer;
-            text-transform: uppercase;
-            transition: 0.2s;
-            margin-top: 10px;
+            transition: all 0.2s ease;
         }
+        .connect-btn:hover { background: #333333; transform: scale(1.02); }
 
-        .btn-action:hover {
-            background: #fff;
-            transform: scale(1.02);
-        }
-
-        .btn-close {
-            background: #ff007a;
-            margin-top: 10px;
-        }
-
-        #mint-status {
-            margin-top: 20px;
-            font-size: 18px;
-            color: #00d4ff;
+        /* Main Card */
+        .main-container {
+            margin-top: 120px;
+            background: #ffffff;
+            width: 100%;
+            max-width: 480px;
+            padding: 40px;
+            border-radius: 24px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.04), 0 2px 10px rgba(0, 0, 0, 0.02);
             text-align: center;
-            min-height: 25px;
         }
 
-        /* --- Dynamic Anime Action Lines Overlay --- */
-        .action-lines {
+        h1 { font-size: 28px; font-weight: 600; margin-bottom: 10px; letter-spacing: -0.5px; }
+        p.subtitle { color: #86868b; font-size: 15px; margin-bottom: 30px; line-height: 1.5; }
+
+        /* Upload Zone */
+        .upload-area {
+            border: 2px dashed #d2d2d7;
+            border-radius: 16px;
+            padding: 40px 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: #fafafa;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .upload-area:hover, .upload-area.dragover {
+            border-color: #0071e3;
+            background: #f0f8ff;
+        }
+
+        .upload-area input { display: none; }
+        .upload-icon { font-size: 24px; margin-bottom: 10px; color: #0071e3; }
+        .upload-text { font-size: 15px; font-weight: 500; color: #1d1d1f; }
+        .upload-hint { font-size: 13px; color: #86868b; margin-top: 5px; }
+
+        /* Preview Container (Hidden by default) */
+        #preview-container { display: none; margin-bottom: 20px; position: relative; }
+        
+        #imagePreview {
+            width: 100%;
+            max-height: 250px;
+            object-fit: cover;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        /* Cancel Selection Button */
+        .cancel-btn {
             position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: repeating-radial-gradient(
-                circle at center,
-                transparent 0,
-                transparent 10px,
-                rgba(0, 212, 255, 0.1) 10px,
-                rgba(0, 212, 255, 0.1) 20px
-            );
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.5s;
-            z-index: 5;
+            top: -10px;
+            right: -10px;
+            background: #ff3b30;
+            color: white;
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(255, 59, 48, 0.4);
+            transition: 0.2s;
+        }
+        .cancel-btn:hover { transform: scale(1.1); }
+
+        /* Action Button (Mint) */
+        .mint-btn {
+            width: 100%;
+            background: #0071e3; /* Apple/Arc Blue */
+            color: #ffffff;
+            border: none;
+            padding: 16px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
         }
 
-        .action-lines.active {
-            opacity: 1;
-            animation: pulse-lines 0.5s infinite alternate;
-        }
+        .mint-btn:hover { background: #0077ed; box-shadow: 0 4px 15px rgba(0, 113, 227, 0.3); }
+        .mint-btn:disabled { background: #d2d2d7; cursor: not-allowed; box-shadow: none; }
 
-        @keyframes pulse-lines {
-            0% { transform: scale(1); }
-            100% { transform: scale(1.05); }
-        }
-
+        #status { margin-top: 20px; font-size: 14px; font-weight: 500; color: #86868b; }
     </style>
 </head>
 <body>
 
-    <div id="game-container">
-        <!-- 2D Canvas Engine -->
-        <canvas id="gameCanvas" width="1024" height="768"></canvas>
-        <div class="action-lines" id="anime-overlay"></div>
+    <!-- Top Navigation -->
+    <nav>
+        <div class="logo">Arc Matrix</div>
+        <button class="connect-btn" id="connectWalletBtn" onclick="connectWallet()">Connect Wallet</button>
+    </nav>
 
-        <!-- UI Overlay -->
-        <div id="ui-layer">
-            
-            <div class="hud-box" id="player-stats">
-                <div>PLAYER: ZERO</div>
-                <div>Lvl: 99</div>
-                <div class="health-bar-bg">
-                    <div class="health-bar-fill"></div>
-                </div>
-                <div style="margin-top: 10px; font-size: 16px; color: #888;">Use W, A, S, D to Move</div>
-                <div style="font-size: 16px; color: #888;">Press 'E' to Interact</div>
-            </div>
+    <!-- Main Minting Card -->
+    <div class="main-container">
+        <h1>Mint Your Masterpiece</h1>
+        <p class="subtitle">Secure your physical sketches and digital assets on the Arc blockchain forever.</p>
 
-            <!-- Dialogue System -->
-            <div id="dialogue-box">
-                <div id="dialogue-name">???</div>
-                <div id="dialogue-text"></div>
-            </div>
+        <!-- Drag & Drop Zone -->
+        <label class="upload-area" id="dropzone" for="fileInput">
+            <div class="upload-icon">✦</div>
+            <div class="upload-text">Click or drag image here</div>
+            <div class="upload-hint">High-res JPG or PNG</div>
+            <input type="file" id="fileInput" accept="image/*">
+        </label>
 
-            <!-- Web3 Mint Terminal -->
-            <div id="mint-terminal">
-                <div class="terminal-header">ARC SMART CONTRACT INTEGRATION</div>
-                
-                <label class="upload-zone" id="dropzone" for="art-upload">
-                    <span id="upload-msg">DRAG ART OR CLICK HERE</span>
-                    <input type="file" id="art-upload" accept="image/*">
-                    <img id="art-preview" alt="Preview">
-                </label>
-
-                <button class="btn-action" onclick="engine.web3.executeMint()">EXECUTE ON-CHAIN MINT</button>
-                <button class="btn-action btn-close" onclick="engine.ui.closeTerminal()">ABORT</button>
-                
-                <div id="mint-status">SYSTEM IDLE</div>
-            </div>
-
+        <!-- Image Preview & Cancel Option -->
+        <div id="preview-container">
+            <button class="cancel-btn" onclick="cancelImage()" title="Remove Image">✕</button>
+            <img id="imagePreview" alt="Artwork Preview">
         </div>
+
+        <button class="mint-btn" id="mintBtn" onclick="mintNFT()">Mint to Arc</button>
+        <div id="status">Ready when you are.</div>
     </div>
 
     <script>
-        /* =========================================
-           GAME ENGINE - CORE LOGIC (MASSIVE JS ARCHITECTURE)
-           ========================================= */
+        // --- 1. APNA CONTRACT ADDRESS YAHAN DAALEIN ---
+        const contractAddress = "0x27dAF01a62674d66bC17019A554db1E07580168C";
+        const contractABI = ["function mintNFT(address to) public"];
 
-        const CONTRACT_ADDRESS = "0x27dAF01a62674d66bC17019A554db1E07580168C";
-        const CONTRACT_ABI = ["function mintNFT(address to) public"];
+        // Global Variables
+        let userWalletAddress = null;
+        let provider = null;
+        let signer = null;
 
-        // Engine Configuration
-        const CONFIG = {
-            TILE_SIZE: 64,
-            FPS: 60,
-            GRAVITY: 0, // Top-down RPG doesn't need gravity
-            FRICTION: 0.8,
-            PLAYER_SPEED: 5,
-            WORLD_WIDTH: 32, // Tiles
-            WORLD_HEIGHT: 24 // Tiles
-        };
+        // --- 2. CONNECT WALLET LOGIC ---
+        async function connectWallet() {
+            const connectBtn = document.getElementById('connectWalletBtn');
+            const statusText = document.getElementById('status');
 
-        /* =========================================
-           LEVEL DATA - TILEMAP GENERATION
-           0: Grass, 1: Wall/Block, 2: Water, 3: Special Mint Altar
-           Massive Array defining the world boundaries and structures.
-           ========================================= */
-        const TILEMAP = [
-            [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-            [1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1],
-            [1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1],
-            [1,0,0,2,2,0,0,1,0,0,3,3,3,0,0,1],
-            [1,0,0,2,2,0,0,0,0,0,3,3,3,0,0,1],
-            [1,0,0,0,0,0,0,0,0,0,3,3,3,0,0,1],
-            [1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1],
-            [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-            [1,0,0,0,0,1,1,1,1,0,0,0,0,0,0,1],
-            [1,0,0,0,0,1,0,0,1,0,0,0,0,0,0,1],
-            [1,0,0,0,0,1,0,0,1,0,0,0,0,0,0,1],
-            [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
-        ];
-
-        /* =========================================
-           CLASSES - OOP ARCHITECTURE
-           ========================================= */
-
-        class InputManager {
-            constructor() {
-                this.keys = {};
-                window.addEventListener('keydown', (e) => this.keys[e.key.toLowerCase()] = true);
-                window.addEventListener('keyup', (e) => this.keys[e.key.toLowerCase()] = false);
+            if (typeof window.ethereum === 'undefined') {
+                alert("Please install MetaMask to use this feature!");
+                return;
             }
-            isPressed(key) {
-                return this.keys[key] || false;
+
+            try {
+                statusText.innerText = "Connecting to MetaMask...";
+                await window.ethereum.request({ method: 'eth_requestAccounts' });
+                
+                provider = new ethers.providers.Web3Provider(window.ethereum);
+                signer = provider.getSigner();
+                userWalletAddress = await signer.getAddress();
+
+                // Button ka text chota address dikhayega (e.g. 0x12...ABCD)
+                const shortAddress = userWalletAddress.substring(0, 6) + "..." + userWalletAddress.substring(38);
+                connectBtn.innerText = shortAddress;
+                connectBtn.style.background = "#34c759"; // Green color indicating success
+                
+                statusText.innerText = "Wallet Connected Successfully.";
+            } catch (error) {
+                console.error(error);
+                statusText.innerText = "Failed to connect wallet.";
             }
         }
 
-        class Entity {
-            constructor(x, y, width, height, color) {
-                this.x = x;
-                this.y = y;
-                this.width = width;
-                this.height = height;
-                this.color = color;
-                this.vx = 0;
-                this.vy = 0;
-            }
+        // --- 3. DRAG & DROP AND CANCEL LOGIC ---
+        const dropzone = document.getElementById('dropzone');
+        const fileInput = document.getElementById('fileInput');
+        const previewContainer = document.getElementById('preview-container');
+        const imagePreview = document.getElementById('imagePreview');
+        const statusText = document.getElementById('status');
 
-            draw(ctx, camera) {
-                ctx.fillStyle = this.color;
-                // Add shadow for 3D depth effect
-                ctx.shadowColor = 'rgba(0,0,0,0.5)';
-                ctx.shadowBlur = 10;
-                ctx.shadowOffsetX = 5;
-                ctx.shadowOffsetY = 5;
-                
-                ctx.fillRect(this.x - camera.x, this.y - camera.y, this.width, this.height);
-                
-                // Reset shadows
-                ctx.shadowBlur = 0;
-                ctx.shadowOffsetX = 0;
-                ctx.shadowOffsetY = 0;
-            }
+        // Handle Drag & Drop styling
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropzone.addEventListener(eventName, e => { e.preventDefault(); e.stopPropagation(); }, false);
+        });
 
-            checkCollision(nx, ny, map) {
-                // AABB Collision Detection against Tilemap
-                let leftTile = Math.floor(nx / CONFIG.TILE_SIZE);
-                let rightTile = Math.floor((nx + this.width - 1) / CONFIG.TILE_SIZE);
-                let topTile = Math.floor(ny / CONFIG.TILE_SIZE);
-                let bottomTile = Math.floor((ny + this.height - 1) / CONFIG.TILE_SIZE);
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropzone.addEventListener(eventName, () => dropzone.classList.add('dragover'), false);
+        });
 
-                // Map Boundaries
-                if (leftTile < 0 || rightTile >= map[0].length || topTile < 0 || bottomTile >= map.length) return true;
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropzone.addEventListener(eventName, () => dropzone.classList.remove('dragover'), false);
+        });
 
-                // Check solid blocks (1 = Wall, 2 = Water)
-                if (map[topTile][leftTile] === 1 || map[topTile][leftTile] === 2) return true;
-                if (map[topTile][rightTile] === 1 || map[topTile][rightTile] === 2) return true;
-                if (map[bottomTile][leftTile] === 1 || map[bottomTile][leftTile] === 2) return true;
-                if (map[bottomTile][rightTile] === 1 || map[bottomTile][rightTile] === 2) return true;
+        dropzone.addEventListener('drop', (e) => {
+            fileInput.files = e.dataTransfer.files;
+            handleFiles(fileInput.files[0]);
+        });
 
-                return false;
-            }
-        }
+        fileInput.addEventListener('change', function() {
+            handleFiles(this.files[0]);
+        });
 
-        class Player extends Entity {
-            constructor(x, y) {
-                super(x, y, 40, 40, '#00d4ff'); // Player is cyan block
-                this.speed = CONFIG.PLAYER_SPEED;
-                this.facing = 'down';
-                this.isInteracting = false;
-                this.auraSize = 0; // Anime aura effect
-            }
-
-            update(input, map, npcs) {
-                if (engine.ui.isLocked) return; // Freeze player during dialogue/terminal
-
-                // Physics & Movement
-                let dx = 0;
-                let dy = 0;
-
-                if (input.isPressed('w')) { dy -= this.speed; this.facing = 'up'; }
-                if (input.isPressed('s')) { dy += this.speed; this.facing = 'down'; }
-                if (input.isPressed('a')) { dx -= this.speed; this.facing = 'left'; }
-                if (input.isPressed('d')) { dx += this.speed; this.facing = 'right'; }
-
-                // Apply Movement with Collision Checks
-                if (!this.checkCollision(this.x + dx, this.y, map)) {
-                    this.x += dx;
-                }
-                if (!this.checkCollision(this.x, this.y + dy, map)) {
-                    this.y += dy;
-                }
-
-                // Interaction Logic
-                if (input.isPressed('e') && !this.isInteracting) {
-                    this.isInteracting = true;
-                    this.checkInteraction(npcs);
-                } else if (!input.isPressed('e')) {
-                    this.isInteracting = false;
-                }
-
-                // Anime Aura Animation
-                this.auraSize = (this.auraSize + 1) % 20;
-            }
-
-            checkInteraction(npcs) {
-                // Determine interaction hit box based on facing direction
-                let ix = this.x;
-                let iy = this.y;
-                let range = 20;
-
-                if (this.facing === 'up') iy -= range;
-                if (this.facing === 'down') iy += range;
-                if (this.facing === 'left') ix -= range;
-                if (this.facing === 'right') ix += range;
-
-                // Check collision with NPCs
-                for (let npc of npcs) {
-                    if (ix < npc.x + npc.width && ix + this.width > npc.x &&
-                        iy < npc.y + npc.height && iy + this.height > npc.y) {
-                        npc.interact();
-                        return;
-                    }
-                }
-            }
-
-            draw(ctx, camera) {
-                // Draw Anime Aura (Haki-like effect)
-                ctx.fillStyle = `rgba(0, 212, 255, ${0.1 + (this.auraSize / 100)})`;
-                ctx.beginPath();
-                ctx.arc(this.x + this.width/2 - camera.x, this.y + this.height/2 - camera.y, 40 + (this.auraSize/2), 0, Math.PI * 2);
-                ctx.fill();
-
-                // Draw Character Body
-                super.draw(ctx, camera);
-                
-                // Draw eyes indicating direction
-                ctx.fillStyle = '#fff';
-                let ex1 = this.x - camera.x + 8;
-                let ey1 = this.y - camera.y + 8;
-                let ex2 = this.x - camera.x + 24;
-                let ey2 = this.y - camera.y + 8;
-
-                if (this.facing === 'down') { ey1 += 20; ey2 += 20; }
-                if (this.facing === 'left') { ex1 -= 5; ex2 -= 5; ey1 += 10; ey2 += 10;}
-                if (this.facing === 'right') { ex1 += 5; ex2 += 5; ey1 += 10; ey2 += 10;}
-
-                ctx.fillRect(ex1, ey1, 8, 8);
-                ctx.fillRect(ex2, ey2, 8, 8);
-            }
-        }
-
-        class NPC extends Entity {
-            constructor(x, y, name, color, dialogueArray, isMintMaster = false) {
-                super(x, y, 40, 40, color);
-                this.name = name;
-                this.dialogue = dialogueArray;
-                this.dialogueIndex = 0;
-                this.isMintMaster = isMintMaster;
-                this.hoverOffset = 0;
-            }
-
-            update() {
-                // Floating animation for NPC
-                this.hoverOffset = Math.sin(Date.now() / 300) * 5;
-            }
-
-            draw(ctx, camera) {
-                ctx.fillStyle = this.color;
-                ctx.fillRect(this.x - camera.x, this.y - camera.y + this.hoverOffset, this.width, this.height);
-                
-                // Exclamation mark above head if interactive
-                ctx.fillStyle = '#fff';
-                ctx.font = '20px "Press Start 2P"';
-                ctx.fillText("!", this.x - camera.x + 12, this.y - camera.y - 15 + this.hoverOffset);
-            }
-
-            interact() {
-                if (this.dialogueIndex < this.dialogue.length) {
-                    engine.ui.showDialogue(this.name, this.dialogue[this.dialogueIndex]);
-                    this.dialogueIndex++;
-                } else {
-                    engine.ui.hideDialogue();
-                    this.dialogueIndex = 0; // Reset dialogue
-                    if (this.isMintMaster) {
-                        engine.ui.openTerminal();
-                    }
-                }
-            }
-        }
-
-        class Camera {
-            constructor(width, height) {
-                this.x = 0;
-                this.y = 0;
-                this.width = width;
-                this.height = height;
-            }
-
-            follow(target, mapWidth, mapHeight) {
-                // Center target in screen
-                this.x = target.x - this.width / 2;
-                this.y = target.y - this.height / 2;
-
-                // Clamp to map bounds
-                this.x = Math.max(0, Math.min(this.x, mapWidth - this.width));
-                this.y = Math.max(0, Math.min(this.y, mapHeight - this.height));
-            }
-        }
-
-        class UIManager {
-            constructor() {
-                this.dialogueBox = document.getElementById('dialogue-box');
-                this.dialogueName = document.getElementById('dialogue-name');
-                this.dialogueText = document.getElementById('dialogue-text');
-                this.terminal = document.getElementById('mint-terminal');
-                this.animeOverlay = document.getElementById('anime-overlay');
-                this.mintStatus = document.getElementById('mint-status');
-                
-                this.isLocked = false; // Locks player movement
-                this.typewriterTimer = null;
-
-                this.setupUploadZone();
-            }
-
-            setupUploadZone() {
-                const dropzone = document.getElementById('dropzone');
-                const fileInput = document.getElementById('art-upload');
-                const preview = document.getElementById('art-preview');
-                const msg = document.getElementById('upload-msg');
-
-                dropzone.addEventListener('click', () => fileInput.click());
-
-                fileInput.addEventListener('change', (e) => {
-                    const file = e.target.files[0];
-                    if (file && file.type.startsWith('image/')) {
-                        const reader = new FileReader();
-                        reader.onload = (e) => {
-                            preview.src = e.target.result;
-                            preview.style.display = 'block';
-                            msg.style.display = 'none';
-                            this.mintStatus.innerText = "ARTWORK LOADED. READY FOR MINT.";
-                        }
-                        reader.readAsDataURL(file);
-                    }
-                });
-            }
-
-            showDialogue(name, text) {
-                this.isLocked = true;
-                this.dialogueBox.style.display = 'block';
-                this.dialogueName.innerText = name;
-                this.dialogueText.innerHTML = "";
-                
-                // Typewriter effect
-                let i = 0;
-                clearInterval(this.typewriterTimer);
-                this.typewriterTimer = setInterval(() => {
-                    if (i < text.length) {
-                        this.dialogueText.innerHTML += text.charAt(i);
-                        i++;
-                    } else {
-                        clearInterval(this.typewriterTimer);
-                        this.dialogueText.innerHTML += '<span class="blinking-cursor">_</span>';
-                    }
-                }, 30);
-            }
-
-            hideDialogue() {
-                this.dialogueBox.style.display = 'none';
-                this.isLocked = false;
-            }
-
-            openTerminal() {
-                this.isLocked = true;
-                this.terminal.style.display = 'flex';
-                this.mintStatus.innerText = "SYSTEM IDLE. AWAITING DATA.";
-            }
-
-            closeTerminal() {
-                this.terminal.style.display = 'none';
-                this.isLocked = false;
-                this.deactivateAnimeMode();
-            }
-
-            activateAnimeMode() {
-                this.animeOverlay.classList.add('active');
-            }
-
-            deactivateAnimeMode() {
-                this.animeOverlay.classList.remove('active');
-            }
-        }
-
-        class Web3Manager {
-            async executeMint() {
-                const status = document.getElementById('mint-status');
-                const fileInput = document.getElementById('art-upload');
-
-                if (!fileInput.files.length) {
-                    status.innerText = "ERROR: NO ARTWORK DETECTED.";
-                    return;
-                }
-
-                if (typeof window.ethereum === 'undefined') {
-                    status.innerText = "CRITICAL ERR: METAMASK NOT FOUND.";
-                    return;
-                }
-
-                try {
-                    engine.ui.activateAnimeMode(); // Trigger visual effects
-                    status.innerText = "INITIATING BLOCKCHAIN PROTOCOL...";
+        // Load and show preview
+        function handleFiles(file) {
+            if (file && file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    imagePreview.src = e.target.result;
                     
-                    await window.ethereum.request({ method: 'eth_requestAccounts' });
-                    const provider = new ethers.providers.Web3Provider(window.ethereum);
-                    const signer = provider.getSigner();
-                    const userAddress = await signer.getAddress();
-                    const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
-
-                    status.innerText = "AWAITING METAMASK SIGNATURE...";
+                    // Hide Upload Area, Show Preview Area
+                    dropzone.style.display = 'none';
+                    previewContainer.style.display = 'block';
                     
-                    const tx = await contract.mintNFT(userAddress);
-                    
-                    status.innerText = "TRANSACTION BROADCASTED. MINING BLOCK...";
-                    await tx.wait();
-                    
-                    status.innerText = "SUCCESS! ARTWORK IMMORTALIZED ON ARC CHAIN.";
-                    engine.ui.deactivateAnimeMode();
-
-                } catch (error) {
-                    console.error(error);
-                    status.innerText = "TRANSACTION FAILED OR REJECTED.";
-                    engine.ui.deactivateAnimeMode();
+                    statusText.innerText = "Image selected. Ready to mint.";
                 }
+                reader.readAsDataURL(file);
             }
         }
 
-        /* =========================================
-           CORE GAME ENGINE
-           ========================================= */
-        class GameEngine {
-            constructor() {
-                this.canvas = document.getElementById('gameCanvas');
-                this.ctx = this.canvas.getContext('2d');
-                
-                this.input = new InputManager();
-                this.ui = new UIManager();
-                this.web3 = new Web3Manager();
-                
-                // Initialize World
-                this.player = new Player(128, 128);
-                this.camera = new Camera(this.canvas.width, this.canvas.height);
-                this.mapWidth = TILEMAP[0].length * CONFIG.TILE_SIZE;
-                this.mapHeight = TILEMAP.length * CONFIG.TILE_SIZE;
-
-                // Load NPCs
-                this.npcs = [
-                    new NPC(200, 200, "OLD SAGE", "#ffcc00", [
-                        "Welcome to the Arc Matrix, traveler.",
-                        "The world above is chaotic, but here the blockchain secures all.",
-                        "Seek the Mint Master in the east to eternalize your art."
-                    ]),
-                    new NPC(650, 250, "MINT MASTER", "#ff007a", [
-                        "Halt! I sense a powerful creative energy within you.",
-                        "Are you ready to bind your physical sketches to the digital realm?",
-                        "Let the minting ritual commence!"
-                    ], true)
-                ];
-
-                this.lastTime = 0;
-            }
-
-            drawMap() {
-                // Drawing the 2D Tilemap Array
-                for (let r = 0; r < TILEMAP.length; r++) {
-                    for (let c = 0; c < TILEMAP[r].length; c++) {
-                        let tileId = TILEMAP[r][c];
-                        let x = c * CONFIG.TILE_SIZE - this.camera.x;
-                        let y = r * CONFIG.TILE_SIZE - this.camera.y;
-
-                        // Only draw visible tiles (Optimization)
-                        if (x < -CONFIG.TILE_SIZE || x > this.canvas.width || y < -CONFIG.TILE_SIZE || y > this.canvas.height) continue;
-
-                        if (tileId === 0) {
-                            this.ctx.fillStyle = '#111827'; // Dark floor
-                            this.ctx.fillRect(x, y, CONFIG.TILE_SIZE, CONFIG.TILE_SIZE);
-                            // Draw grid lines
-                            this.ctx.strokeStyle = '#1f2937';
-                            this.ctx.strokeRect(x, y, CONFIG.TILE_SIZE, CONFIG.TILE_SIZE);
-                        } else if (tileId === 1) {
-                            this.ctx.fillStyle = '#374151'; // Wall
-                            this.ctx.fillRect(x, y, CONFIG.TILE_SIZE, CONFIG.TILE_SIZE);
-                        } else if (tileId === 2) {
-                            this.ctx.fillStyle = '#1e3a8a'; // Water
-                            this.ctx.fillRect(x, y, CONFIG.TILE_SIZE, CONFIG.TILE_SIZE);
-                        } else if (tileId === 3) {
-                            // Altar Tile
-                            this.ctx.fillStyle = '#4c1d95'; 
-                            this.ctx.fillRect(x, y, CONFIG.TILE_SIZE, CONFIG.TILE_SIZE);
-                            this.ctx.strokeStyle = '#8b5cf6';
-                            this.ctx.lineWidth = 2;
-                            this.ctx.strokeRect(x+5, y+5, CONFIG.TILE_SIZE-10, CONFIG.TILE_SIZE-10);
-                        }
-                    }
-                }
-            }
-
-            loop(timestamp) {
-                let deltaTime = timestamp - this.lastTime;
-                this.lastTime = timestamp;
-
-                // 1. UPDATE LOGIC
-                this.player.update(this.input, TILEMAP, this.npcs);
-                this.camera.follow(this.player, this.mapWidth, this.mapHeight);
-                this.npcs.forEach(npc => npc.update());
-
-                // 2. RENDER GRAPHICS
-                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-                this.drawMap();
-                
-                // Sort entities by Y axis for pseudo-3D depth sorting
-                let entities = [this.player, ...this.npcs];
-                entities.sort((a, b) => a.y - b.y);
-                
-                entities.forEach(entity => entity.draw(this.ctx, this.camera));
-
-                requestAnimationFrame((ts) => this.loop(ts));
-            }
-
-            start() {
-                requestAnimationFrame((ts) => this.loop(ts));
-            }
+        // --- 4. CANCEL/REMOVE IMAGE LOGIC ---
+        function cancelImage() {
+            fileInput.value = ""; // Clear the file input
+            
+            // Hide Preview Area, Show Upload Area again
+            previewContainer.style.display = 'none';
+            dropzone.style.display = 'flex';
+            
+            statusText.innerText = "Image removed. Select a new one.";
         }
 
-        // Boot up the engine when window loads
-        const engine = new GameEngine();
-        window.onload = () => {
-            engine.start();
-            console.log("SYSTEM INITIALIZED: ARC MATRIX V1.0");
-        };
+        // --- 5. MINTING LOGIC ---
+        async function mintNFT() {
+            if (!fileInput.files.length) {
+                statusText.innerText = "Please select an image first.";
+                statusText.style.color = "#ff3b30";
+                return;
+            }
 
+            if (!userWalletAddress) {
+                statusText.innerText = "Please Connect Wallet first.";
+                statusText.style.color = "#ff3b30";
+                return;
+            }
+
+            try {
+                statusText.style.color = "#86868b";
+                statusText.innerText = "Please confirm the transaction in MetaMask...";
+                
+                const contract = new ethers.Contract(contractAddress, contractABI, signer);
+                const tx = await contract.mintNFT(userWalletAddress);
+                
+                statusText.innerText = "Minting in progress... Please wait.";
+                await tx.wait();
+                
+                statusText.innerText = "🎉 Masterpiece Successfully Minted to Arc Network!";
+                statusText.style.color = "#34c759";
+            } catch (error) {
+                console.error(error);
+                statusText.innerText = "Transaction failed or rejected.";
+                statusText.style.color = "#ff3b30";
+            }
+        }
     </script>
 </body>
 </html>
