@@ -3,142 +3,167 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Classic Art Studio</title>
+    <title>NO ART // NFT MINT</title>
+    <!-- Web3 Ethers.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
+    <!-- Brutalist Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        /* Classic Elegant Fonts */
-        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Lato:wght@300;400&display=swap');
-        
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         
         body {
-            background-color: #f7f7f5; /* Soft canvas white */
-            color: #222;
-            font-family: 'Lato', sans-serif;
+            background-color: #000000;
+            color: #ffffff;
+            font-family: 'Inter', sans-serif;
+            text-transform: uppercase;
+            overflow-x: hidden;
             display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* Infinite Scrolling Ticker (Like No Art) */
+        .ticker-wrap {
+            width: 100%;
+            overflow: hidden;
+            background-color: #ffffff;
+            color: #000000;
+            padding: 10px 0;
+            border-bottom: 3px solid #000;
+            white-space: nowrap;
+        }
+
+        .ticker {
+            display: inline-block;
+            white-space: nowrap;
+            padding-right: 100%;
+            animation: ticker 15s linear infinite;
+            font-family: 'Anton', sans-serif;
+            font-size: 24px;
+            letter-spacing: 2px;
+        }
+
+        @keyframes ticker {
+            0% { transform: translate3d(0, 0, 0); }
+            100% { transform: translate3d(-100%, 0, 0); }
+        }
+
+        /* Main Container */
+        .container {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
-            height: 100vh;
+            padding: 20px;
         }
 
-        /* The Premium Frame */
-        .gallery-frame {
-            background: #ffffff;
-            padding: 50px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.05);
-            max-width: 500px;
-            width: 90%;
-            position: relative;
-        }
-
-        /* Inner subtle border like an art frame */
-        .gallery-frame::before {
-            content: '';
-            position: absolute;
-            top: 8px; left: 8px; right: 8px; bottom: 8px;
-            border: 1px solid #eee;
-            pointer-events: none;
-        }
-
+        /* Massive Typography */
         h1 {
-            font-family: 'Playfair Display', serif;
-            font-size: 32px;
+            font-family: 'Anton', sans-serif;
+            font-size: clamp(60px, 12vw, 150px);
+            line-height: 0.9;
+            margin-bottom: 20px;
+            letter-spacing: 4px;
             text-align: center;
-            margin-bottom: 8px;
-            color: #111;
-            letter-spacing: 1px;
         }
 
-        p.subtitle {
-            text-align: center;
-            color: #888;
-            margin-bottom: 35px;
+        .subtitle {
+            font-weight: 700;
+            letter-spacing: 2px;
+            margin-bottom: 40px;
             font-size: 14px;
-            font-style: italic;
-            font-family: 'Playfair Display', serif;
+            border: 2px solid #fff;
+            padding: 5px 15px;
         }
 
-        /* Elegant Dropzone */
+        /* Brutalist Dropzone */
         .upload-area {
-            border: 1px solid #ddd;
-            padding: 40px 20px;
+            width: 100%;
+            max-width: 450px;
+            border: 4px dashed #ffffff;
+            padding: 50px 20px;
             text-align: center;
             cursor: pointer;
-            transition: all 0.4s ease;
-            background: #fafafa;
+            transition: all 0.2s ease;
             margin-bottom: 30px;
-            position: relative;
+            background: #000;
         }
 
         .upload-area:hover, .upload-area.dragover {
-            background: #f0f0f0;
-            border-color: #aaa;
+            background: #ffffff;
+            color: #000000;
+            border-style: solid;
         }
 
         .upload-area input { display: none; }
         
-        .upload-area span { 
-            color: #555; 
-            font-size: 13px; 
-            letter-spacing: 2px; 
-            text-transform: uppercase; 
+        #uploadText {
+            font-family: 'Anton', sans-serif;
+            font-size: 24px;
+            letter-spacing: 1px;
         }
 
         #imagePreview {
             max-width: 100%;
-            max-height: 280px;
-            margin-top: 20px;
+            max-height: 300px;
             display: none;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+            border: 4px solid #fff;
+            margin-top: 20px;
+            filter: grayscale(100%); /* Adds to the raw vibe, optional */
         }
 
-        /* Minimalist Button */
+        /* Brutalist Button */
         button {
             width: 100%;
-            background: #111;
-            color: #fff;
-            border: none;
-            padding: 16px;
-            font-size: 14px;
+            max-width: 450px;
+            background: #ffffff;
+            color: #000000;
+            border: 4px solid #ffffff;
+            padding: 20px;
+            font-family: 'Anton', sans-serif;
+            font-size: 32px;
             letter-spacing: 3px;
-            text-transform: uppercase;
             cursor: pointer;
-            transition: background 0.3s, transform 0.2s;
-            font-family: 'Lato', sans-serif;
-            font-weight: bold;
+            transition: all 0.2s ease;
         }
 
-        button:hover { 
-            background: #333; 
-            transform: translateY(-2px);
+        button:hover {
+            background: #000000;
+            color: #ffffff;
         }
 
         #status {
-            margin-top: 25px;
-            text-align: center;
-            font-size: 13px;
-            color: #666;
+            margin-top: 20px;
+            font-weight: 700;
             letter-spacing: 1px;
+            font-size: 14px;
             min-height: 20px;
-            text-transform: uppercase;
+            text-align: center;
         }
     </style>
 </head>
 <body>
 
-    <div class="gallery-frame">
-        <h1>The Classic Studio</h1>
-        <p class="subtitle">Preserving traditional art on the blockchain</p>
+    <!-- Scrolling Ticker -->
+    <div class="ticker-wrap">
+        <div class="ticker">
+            EXCLUSIVE DROP /// ARC NETWORK /// MINT YOUR ASSET /// NO RULES /// NO LIMITS /// EXCLUSIVE DROP /// ARC NETWORK /// MINT YOUR ASSET /// NO RULES /// NO LIMITS ///
+        </div>
+    </div>
+
+    <div class="container">
+        <h1>MINT.</h1>
+        <div class="subtitle">SECURE ON BLOCKCHAIN</div>
 
         <label class="upload-area" id="dropzone" for="fileInput">
-            <span id="uploadText">Click or Drop Artwork Here</span>
+            <span id="uploadText">SELECT FILE</span>
             <input type="file" id="fileInput" accept="image/*">
-            <img id="imagePreview" alt="Artwork Preview">
+            <img id="imagePreview" alt="Preview">
         </label>
 
-        <button onclick="mintNFT()">Mint to Collection</button>
-        
-        <div id="status">Ready to Mint</div>
+        <button onclick="mintNFT()">EXECUTE</button>
+        <div id="status">SYSTEM IDLE</div>
     </div>
 
     <script>
@@ -184,7 +209,7 @@
                     imagePreview.src = e.target.result;
                     imagePreview.style.display = 'block';
                     uploadText.style.display = 'none';
-                    document.getElementById('status').innerText = "Artwork loaded.";
+                    document.getElementById('status').innerText = "ASSET LOADED";
                 }
                 reader.readAsDataURL(file);
             }
@@ -195,17 +220,17 @@
             const statusText = document.getElementById('status');
 
             if (!fileInput.files.length) {
-                statusText.innerText = "Please upload an artwork first.";
+                statusText.innerText = "ERROR: NO FILE SELECTED";
                 return;
             }
 
             if (typeof window.ethereum === 'undefined') {
-                statusText.innerText = "MetaMask not detected.";
+                statusText.innerText = "ERROR: METAMASK OFFLINE";
                 return;
             }
 
             try {
-                statusText.innerText = "Connecting to MetaMask...";
+                statusText.innerText = "CONNECTING...";
                 await window.ethereum.request({ method: 'eth_requestAccounts' });
                 
                 const provider = new ethers.providers.Web3Provider(window.ethereum);
@@ -213,17 +238,17 @@
                 const userAddress = await signer.getAddress();
                 const contract = new ethers.Contract(contractAddress, contractABI, signer);
 
-                statusText.innerText = "Please confirm in MetaMask...";
+                statusText.innerText = "AWAITING CONFIRMATION...";
                 
                 const tx = await contract.mintNFT(userAddress);
                 
-                statusText.innerText = "Securing on Blockchain. Please wait...";
+                statusText.innerText = "WRITING TO BLOCKCHAIN...";
                 await tx.wait();
                 
-                statusText.innerText = "Masterpiece Successfully Minted.";
+                statusText.innerText = "SUCCESS: MINT COMPLETE";
             } catch (error) {
                 console.error(error);
-                statusText.innerText = "Transaction Cancelled or Failed.";
+                statusText.innerText = "ERROR: TRANSACTION FAILED";
             }
         }
     </script>
