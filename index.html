@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Art Collection</title>
+    <!-- Ye line Web3 (Ethers.js) ko connect karti hai -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-align: center; background: #f4f4f9; padding: 50px; color: #333; }
         .card { background: white; padding: 40px; border-radius: 15px; box-shadow: 0 10px 20px rgba(0,0,0,0.1); display: inline-block; max-width: 600px; }
@@ -11,13 +13,56 @@
         p { font-size: 18px; color: #666; line-height: 1.6; }
         button { background: #0070f3; color: white; border: none; padding: 15px 30px; border-radius: 8px; cursor: pointer; font-size: 18px; font-weight: bold; margin-top: 20px; transition: 0.3s; }
         button:hover { background: #005bb5; box-shadow: 0 5px 15px rgba(0,112,243,0.4); }
+        #status { margin-top: 20px; font-weight: bold; color: green; }
     </style>
 </head>
 <body>
     <div class="card">
         <h1>My Digital Art Gallery</h1>
         <p>Welcome to my Multiverse Gallery. This collection features my hand-drawn physical sketches alongside high-resolution digital assets, all secured on the Arc blockchain.</p>
-        <button onclick="alert('Smart Contract connection coming in the next step!')">Mint NFT</button>
+        <button id="mintButton" onclick="mintNFT()">Mint NFT</button>
+        <p id="status"></p>
     </div>
+
+    <script>
+        // 1. Apna contract address yahan daalein!
+        const contractAddress = "0x27dAF01a62674d66bC17019A554db1E07580168C";
+
+        // 2. Contract ko samajhne ke liye ABI
+        const contractABI = ["function mintNFT(address to) public"];
+
+        async function mintNFT() {
+            const statusText = document.getElementById("status");
+
+            if (typeof window.ethereum === 'undefined') {
+                alert("Please install MetaMask to mint NFTs!");
+                return;
+            }
+
+            try {
+                statusText.innerText = "MetaMask connect ho raha hai...";
+                await window.ethereum.request({ method: 'eth_requestAccounts' });
+                
+                const provider = new ethers.providers.Web3Provider(window.ethereum);
+                const signer = provider.getSigner();
+                const userAddress = await signer.getAddress();
+
+                const contract = new ethers.Contract(contractAddress, contractABI, signer);
+
+                statusText.innerText = "Transaction aa rahi hai... MetaMask mein Confirm karein!";
+                
+                // Smart contract ko call kar rahe hain
+                const tx = await contract.mintNFT(userAddress);
+                
+                statusText.innerText = "Blockchain par save ho raha hai... Thoda wait karein.";
+                await tx.wait();
+                
+                statusText.innerText = "Badhai ho! Aapki NFT successfully mint ho gayi! 🎉";
+            } catch (error) {
+                console.error(error);
+                statusText.innerText = "Koi error aayi hai. MetaMask check karein.";
+            }
+        }
+    </script>
 </body>
 </html>
