@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TrixSwap - Omnitrix Cinematic Video</title>
+    <title>TrixSwap - Alien X Cosmic Terminal</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
     
@@ -15,28 +15,38 @@
             justify-content: center; align-items: center; font-family: 'Orbitron', sans-serif; overflow: hidden; user-select: none;
         }
 
-        /* --- FULL VIDEO BACKGROUND WITH SOUND --- */
-        .bg-video-container {
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -2; overflow: hidden;
-            background: #000;
+        /* --- ALIEN X COSMIC GALAXY BACKGROUND --- */
+        .alienx-layer {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            z-index: -2; pointer-events: none; background: #010204; overflow: hidden;
         }
-        .bg-video-container video {
-            width: 100%; height: 100%; object-fit: cover; filter: brightness(0.6) contrast(1.1);
+        
+        /* Deep space starfield + swirling nebula simulation */
+        .nebula-swirl {
+            position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+            background: radial-gradient(circle, rgba(100,0,255,0.15) 0%, rgba(0,255,150,0.08) 30%, rgba(0,0,0,0.95) 70%);
+            animation: cosmicRotate 25s linear infinite;
         }
-        /* Dark atmospheric overlay so text/dials pop out clearly */
-        .bg-overlay {
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1;
-            background: radial-gradient(circle, rgba(0,255,102,0.08) 0%, rgba(0,0,0,0.75) 85%);
-            pointer-events: none;
+        @keyframes cosmicRotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
 
-        /* --- UNMUTE BUTTON FOR VIDEO AUDIO --- */
-        .sound-toggle {
-            position: absolute; top: 20px; left: 20px; padding: 10px 18px; border: 1px solid rgba(255,255,255,0.2);
-            background: rgba(0,0,0,0.8); color: #fff; font-family: 'Share Tech Mono', monospace; font-size: 14px;
-            border-radius: 5px; cursor: pointer; z-index: 100; display: flex; align-items: center; gap: 8px; transition: all 0.3s ease;
+        /* White floating stars (Alien X space body texture) */
+        .star {
+            position: absolute; background: #ffffff; border-radius: 50%;
+            animation: starTwinkle var(--duration) infinite ease-in-out alternate;
         }
-        .sound-toggle:hover { border-color: var(--theme-color); box-shadow: 0 0 15px rgba(0,255,102,0.3); }
+        @keyframes starTwinkle {
+            0% { opacity: 0.2; transform: scale(0.8); }
+            100% { opacity: 1; transform: scale(1.4); box-shadow: 0 0 8px #ffffff, 0 0 15px #60a5fa; }
+        }
+
+        .bg-grid {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1;
+            background-image: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(96, 165, 250, 0.03) 3px, transparent 4px);
+            pointer-events: none;
+        }
 
         /* --- WALLET HUD --- */
         .wallet-hud {
@@ -158,18 +168,12 @@
 </head>
 <body>
 
-    <!-- FULL VIDEO BACKGROUND WITH SOUND & LOOP -->
-    <div class="bg-video-container">
-        <!-- Direct HD Ben 10 Intro Source Loop with Sound Enabled -->
-        <video id="bg-vid" autoplay muted loop playsinline>
-            <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" type="video/mp4">
-            Your browser does not support video.
-        </video>
+    <!-- ALIEN X COSMIC BODY BACKGROUND -->
+    <div class="alienx-layer">
+        <div class="nebula-swirl"></div>
+        <!-- Dynamic Stars Generated via JS -->
     </div>
-    <div class="bg-overlay"></div>
-
-    <!-- SOUND TOGGLE BUTTON (Browsers block autoplay sound until clicked) -->
-    <button class="sound-toggle" id="sound-btn" onclick="toggleSound()">🔊 ENABLE AUDIO</button>
+    <div class="bg-grid"></div>
 
     <div class="wallet-hud" id="wallet-btn">
         <div class="status-dot"></div>
@@ -312,15 +316,19 @@
     <div class="flash" id="flash"></div>
 
     <script>
-        // --- VIDEO AUDIO TOGGLE HANDLER ---
-        const bgVid = document.getElementById('bg-vid');
-        const soundBtn = document.getElementById('sound-btn');
-        let isMuted = true;
-
-        function toggleSound() {
-            isMuted = !isMuted;
-            bgVid.muted = isMuted;
-            soundBtn.innerText = isMuted ? "🔊 ENABLE AUDIO" : "🔇 MUTE AUDIO";
+        // --- GENERATE ALIEN X COSMIC STARS ---
+        const alienLayer = document.querySelector('.alienx-layer');
+        for (let i = 0; i < 70; i++) {
+            const star = document.createElement('div');
+            star.className = 'star';
+            const size = Math.random() * 3 + 1;
+            star.style.width = `${size}px`;
+            star.style.height = `${size}px`;
+            star.style.top = `${Math.random() * 100}vh`;
+            star.style.left = `${Math.random() * 100}vw`;
+            star.style.setProperty('--duration', `${Math.random() * 3 + 2}s`);
+            star.style.animationDelay = `${Math.random() * 3}s`;
+            alienLayer.appendChild(star);
         }
 
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -775,6 +783,7 @@
             lendTerminal.classList.remove('open');
             borrowTerminal.classList.remove('open');
             faucetTerminal.classList.remove('open');
+            body.classList.add('terminal-active'); // wait, keep it clean:
             body.classList.remove('terminal-active');
             isOn = false; body.classList.remove('is-on');
             pText.innerText = "TAP TO INITIALIZE";
