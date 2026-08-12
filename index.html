@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TrixSwap - Cinematic Omniverse</title>
+    <title>TrixSwap - Omnitrix Cinematic</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
     
@@ -13,23 +13,22 @@
         body {
             background-color: var(--bg-color); margin: 0; height: 100vh; display: flex; flex-direction: column;
             justify-content: center; align-items: center; font-family: 'Orbitron', sans-serif; overflow: hidden; user-select: none;
-            background-image: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255, 255, 255, 0.02) 3px, transparent 4px);
         }
 
-        /* --- CINEMATIC INTRO VIDEO OVERLAY --- */
-        .intro-overlay {
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #000;
-            z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center;
-            transition: opacity 0.8s ease; cursor: pointer;
+        /* --- 4-SECOND LOOPING BACKGROUND VIDEO --- */
+        .bg-video-container {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -2; overflow: hidden;
         }
-        .intro-overlay video { width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; }
-        .skip-intro {
-            position: absolute; bottom: 30px; padding: 10px 25px; background: rgba(0,255,102,0.2);
-            border: 1px solid var(--theme-color); color: var(--theme-color); font-family: 'Orbitron', sans-serif;
-            font-weight: bold; border-radius: 8px; cursor: pointer; z-index: 10000; letter-spacing: 2px;
-            box-shadow: 0 0 15px rgba(0,255,102,0.3); transition: 0.3s;
+        .bg-video-container video {
+            width: 100%; height: 100%; object-fit: cover; filter: brightness(0.35) contrast(1.2);
         }
-        .skip-intro:hover { background: var(--theme-color); color: #000; }
+        /* Dark futuristic grid overlay to remove empty feel */
+        .bg-overlay {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1;
+            background: radial-gradient(circle, rgba(0,255,102,0.05) 0%, rgba(0,0,0,0.85) 80%);
+            background-image: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 255, 102, 0.03) 3px, transparent 4px);
+            pointer-events: none;
+        }
 
         /* --- WALLET HUD --- */
         .wallet-hud {
@@ -43,7 +42,7 @@
 
         /* --- BACKGROUND --- */
         .bg-title { position: absolute; top: 12%; font-size: 42px; font-weight: 900; letter-spacing: 12px; color: var(--theme-color); opacity: 0.9; text-shadow: 0 0 20px var(--theme-color); z-index: 5; transition: opacity 0.3s; }
-        .bg-orb { position: absolute; top: 50%; left: 50%; width: 500px; height: 500px; transform: translate(-50%, -50%); border-radius: 50%; background: radial-gradient(circle, var(--theme-color) 0%, transparent 70%); opacity: 0.06; z-index: 1; pointer-events: none; }
+        .bg-orb { position: absolute; top: 50%; left: 50%; width: 500px; height: 500px; transform: translate(-50%, -50%); border-radius: 50%; background: radial-gradient(circle, var(--theme-color) 0%, transparent 70%); opacity: 0.1; z-index: 1; pointer-events: none; }
 
         /* --- PROJECTOR BASE --- */
         .projector-wrap { position: absolute; bottom: 50px; display: flex; flex-direction: column; align-items: center; cursor: pointer; z-index: 50; transition: opacity 0.3s; }
@@ -151,15 +150,13 @@
 </head>
 <body>
 
-    <!-- CINEMATIC VIDEO INTRO OVERLAY -->
-    <div class="intro-overlay" id="intro-overlay">
-        <!-- Aap yahan apni video ka direct link ya local path daal sakte hain -->
-        <video id="intro-video" autoplay muted playsinline>
-            <source src="https://assets.mixkit.co/videos/preview/mixkit-digital-animation-of-screens-and-numbers-31917-large.mp4" type="video/mp4">
-            Your browser does not support video.
+    <!-- 4-SECOND LOOPING BACKGROUND VIDEO -->
+    <div class="bg-video-container">
+        <video autoplay muted loop playsinline>
+            <source src="https://assets.mixkit.co/videos/preview/mixkit-futuristic-digital-background-screen-31918-large.mp4" type="video/mp4">
         </video>
-        <button class="skip-intro" onclick="closeIntro()">INITIALIZE TRIXSWAP ➔</button>
     </div>
+    <div class="bg-overlay"></div>
 
     <div class="wallet-hud" id="wallet-btn">
         <div class="status-dot"></div>
@@ -302,19 +299,6 @@
     <div class="flash" id="flash"></div>
 
     <script>
-        // --- INTRO VIDEO LOGIC ---
-        function closeIntro() {
-            const overlay = document.getElementById('intro-overlay');
-            overlay.style.opacity = '0';
-            setTimeout(() => {
-                overlay.style.display = 'none';
-            }, 800);
-        }
-        
-        // Auto close after video ends or plays for 5 seconds
-        const introVideo = document.getElementById('intro-video');
-        introVideo.onended = () => { closeIntro(); };
-
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         function playTickSound() {
             if (audioCtx.state === 'suspended') audioCtx.resume();
