@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TrixSwap - ARC Network Terminal</title>
+    <title>TrixSwap - Advanced ARC Terminal</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
-    <!-- Ethers.js library for Web3 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
     
     <style>
@@ -15,34 +14,30 @@
             background-color: var(--bg-color); margin: 0; height: 100vh; display: flex; flex-direction: column;
             justify-content: center; align-items: center; font-family: 'Orbitron', sans-serif; overflow: hidden; user-select: none;
             background-image: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255, 255, 255, 0.02) 3px, transparent 4px);
-            transition: background 0.5s ease;
         }
 
-        /* --- WALLET HUD (TOP RIGHT) --- */
+        /* --- WALLET HUD --- */
         .wallet-hud {
             position: absolute; top: 20px; right: 20px; padding: 10px 20px; border: 1px solid rgba(255,255,255,0.2);
             background: rgba(0,0,0,0.8); color: #fff; font-family: 'Share Tech Mono', monospace; font-size: 14px;
             border-radius: 5px; cursor: pointer; z-index: 100; display: flex; align-items: center; gap: 10px; transition: all 0.3s ease;
         }
         .wallet-hud:hover { border-color: var(--theme-color); box-shadow: 0 0 15px rgba(0,255,102,0.3); }
-        .status-dot { width: 8px; height: 8px; border-radius: 50%; background: #ff3333; box-shadow: 0 0 8px #ff3333; }
+        .status-dot { width: 8px; height: 8px; border-radius: 50%; background: #ff3333; }
         .wallet-hud.connected .status-dot { background: #00ff66; box-shadow: 0 0 8px #00ff66; }
 
-        /* --- BACKGROUND DECORATION --- */
+        /* --- BACKGROUND --- */
         .bg-title { position: absolute; top: 12%; font-size: 42px; font-weight: 900; letter-spacing: 12px; color: var(--theme-color); opacity: 0.9; text-shadow: 0 0 20px var(--theme-color); z-index: 5; transition: opacity 0.3s; }
         .bg-orb { position: absolute; top: 50%; left: 50%; width: 500px; height: 500px; transform: translate(-50%, -50%); border-radius: 50%; background: radial-gradient(circle, var(--theme-color) 0%, transparent 70%); opacity: 0.06; z-index: 1; pointer-events: none; }
 
-        /* --- PROJECTOR BASE & BEAM --- */
+        /* --- HOLOGRAPHIC PROJECTOR --- */
         .projector-wrap { position: absolute; bottom: 50px; display: flex; flex-direction: column; align-items: center; cursor: pointer; z-index: 50; transition: opacity 0.3s; }
         .projector { width: 80px; height: 25px; background: #fff; border-radius: 50%; box-shadow: 0 0 30px var(--theme-color), 0 0 60px var(--theme-color); }
         .projector-text { margin-top: 12px; color: var(--theme-color); font-size: 12px; letter-spacing: 4px; }
-        
         .beam { position: absolute; bottom: 60px; width: 350px; height: 400px; background: linear-gradient(to top, rgba(255,255,255,0.1), transparent); clip-path: polygon(50% 100%, 0 0, 100% 0); opacity: 0; transform-origin: bottom center; transition: opacity 0.5s; pointer-events: none; }
 
-        /* --- 3D CAROUSEL (HOLOGRAM) --- */
         .scene { position: absolute; top: 25%; width: 300px; height: 200px; perspective: 1000px; opacity: 0; transition: opacity 0.4s; pointer-events: none; }
         .carousel { width: 100%; height: 100%; position: absolute; transform-style: preserve-3d; transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        
         .holo-item { position: absolute; width: 160px; height: 120px; left: 50%; top: 50%; margin-left: -80px; margin-top: -60px; display: flex; flex-direction: column; justify-content: center; align-items: center; opacity: 0.1; filter: blur(4px); transition: all 0.5s; }
         .holo-item .icon { font-size: 70px; margin-bottom: 10px; line-height: 1; }
         .holo-item .name { font-size: 22px; font-weight: 900; letter-spacing: 3px; }
@@ -51,58 +46,51 @@
         .item-1 { transform: rotateY(90deg) translateZ(180px); color: #00d4ff; text-shadow: 0 0 20px #00d4ff; }
         .item-2 { transform: rotateY(180deg) translateZ(180px); color: #b100ff; text-shadow: 0 0 20px #b100ff; }
         .item-3 { transform: rotateY(270deg) translateZ(180px); color: #ffea00; text-shadow: 0 0 20px #ffea00; }
-
         .holo-item.active { opacity: 1; filter: blur(0px); transform: scale(1.2); pointer-events: auto; cursor: pointer; }
-        .item-0.active { transform: rotateY(0deg) translateZ(180px) scale(1.3); }
-        .item-1.active { transform: rotateY(90deg) translateZ(180px) scale(1.3); }
-        .item-2.active { transform: rotateY(180deg) translateZ(180px) scale(1.3); }
-        .item-3.active { transform: rotateY(270deg) translateZ(180px) scale(1.3); }
 
-        body.is-on .scene { opacity: 1; }
-        body.is-on .beam { opacity: 1; }
+        body.is-on .scene, body.is-on .beam { opacity: 1; }
         body.is-on .bg-title { opacity: 0.15; }
 
-        /* --- THE SWAP TERMINAL UI --- */
+        /* --- SWAP TERMINAL UI --- */
         .swap-terminal {
             position: absolute; top: 45%; left: 50%;
             transform: translate(-50%, -50%) scale(0.8);
-            width: 360px; background: rgba(5, 15, 5, 0.9); border: 2px solid var(--theme-color);
+            width: 380px; background: rgba(5, 15, 5, 0.95); border: 2px solid var(--theme-color);
             box-shadow: 0 0 30px rgba(0,255,102,0.2), inset 0 0 20px rgba(0,255,102,0.1);
             border-radius: 15px; padding: 25px; z-index: 200; opacity: 0; pointer-events: none;
             transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             font-family: 'Share Tech Mono', monospace; backdrop-filter: blur(10px);
         }
 
-        .swap-terminal.open {
-            transform: translate(-50%, -50%) scale(1);
-            opacity: 1; pointer-events: auto;
-        }
-
-        .terminal-header { text-align: center; font-size: 20px; font-family: 'Orbitron', sans-serif; font-weight: 900; color: var(--theme-color); letter-spacing: 3px; margin-bottom: 25px; text-shadow: 0 0 10px var(--theme-color); }
+        .swap-terminal.open { transform: translate(-50%, -50%) scale(1); opacity: 1; pointer-events: auto; }
+        .terminal-header { text-align: center; font-size: 20px; font-family: 'Orbitron', sans-serif; font-weight: 900; color: var(--theme-color); letter-spacing: 3px; margin-bottom: 20px; text-shadow: 0 0 10px var(--theme-color); }
         
         .swap-box { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 15px; margin-bottom: 15px; position: relative; }
-        .swap-label { display: block; font-size: 12px; color: #888; margin-bottom: 8px; }
+        
+        .swap-label-row { display: flex; justify-content: space-between; font-size: 12px; color: #aaa; margin-bottom: 8px; }
+        .max-btn { background: rgba(0,255,102,0.2); border: 1px solid var(--theme-color); color: var(--theme-color); border-radius: 4px; padding: 2px 6px; cursor: pointer; font-family: 'Orbitron', sans-serif; font-size: 10px; margin-left: 10px; transition: 0.2s;}
+        .max-btn:hover { background: var(--theme-color); color: #000; }
+
         .swap-row { display: flex; justify-content: space-between; align-items: center; }
-        
-        .swap-row input { background: transparent; border: none; color: #fff; font-size: 28px; width: 60%; font-family: 'Share Tech Mono', monospace; outline: none; }
+        .swap-row input { background: transparent; border: none; color: #fff; font-size: 26px; width: 60%; font-family: 'Share Tech Mono', monospace; outline: none; }
         .swap-row input::placeholder { color: rgba(255,255,255,0.2); }
-        
-        .swap-row select { background: rgba(0,255,102,0.1); color: var(--theme-color); border: 1px solid var(--theme-color); padding: 8px 12px; border-radius: 8px; font-weight: bold; font-family: 'Orbitron', sans-serif; outline: none; cursor: pointer; font-size: 14px; }
+        .swap-row select { background: rgba(0,255,102,0.1); color: var(--theme-color); border: 1px solid var(--theme-color); padding: 8px; border-radius: 8px; font-weight: bold; font-family: 'Orbitron', sans-serif; outline: none; cursor: pointer; }
         .swap-row select option { background: #111; color: #fff; }
 
-        .swap-arrow { position: absolute; left: 50%; bottom: -20px; transform: translateX(-50%); width: 30px; height: 30px; background: #111; border: 1px solid var(--theme-color); border-radius: 50%; display: flex; justify-content: center; align-items: center; color: var(--theme-color); font-weight: bold; z-index: 10; font-family: 'Orbitron', sans-serif; cursor: pointer; }
+        .swap-arrow { position: absolute; left: 50%; bottom: -20px; transform: translateX(-50%); width: 30px; height: 30px; background: #111; border: 1px solid var(--theme-color); border-radius: 50%; display: flex; justify-content: center; align-items: center; color: var(--theme-color); z-index: 10; font-family: 'Orbitron', sans-serif; cursor: pointer; }
 
-        .execute-btn { width: 100%; padding: 18px; background: var(--theme-color); color: #000; border: none; border-radius: 10px; font-size: 16px; font-weight: 900; font-family: 'Orbitron', sans-serif; cursor: pointer; margin-top: 15px; transition: 0.3s; box-shadow: 0 0 15px rgba(0,255,102,0.4); }
+        .price-impact { font-size: 12px; color: #888; text-align: center; margin-top: -5px; margin-bottom: 10px; min-height: 15px;}
+        
+        .execute-btn { width: 100%; padding: 18px; background: var(--theme-color); color: #000; border: none; border-radius: 10px; font-size: 16px; font-weight: 900; font-family: 'Orbitron', sans-serif; cursor: pointer; transition: 0.3s; box-shadow: 0 0 15px rgba(0,255,102,0.4); }
         .execute-btn:hover { box-shadow: 0 0 25px var(--theme-color); transform: translateY(-2px); }
+        .execute-btn.warn { background: transparent; border: 2px solid #ffea00; color: #ffea00; box-shadow: 0 0 15px rgba(255, 234, 0, 0.4); }
 
-        .close-btn { position: absolute; top: 15px; right: 15px; background: transparent; color: #aaa; border: none; cursor: pointer; font-size: 20px; transition: color 0.2s; }
+        .close-btn { position: absolute; top: 15px; right: 15px; background: transparent; color: #aaa; border: none; cursor: pointer; font-size: 20px; }
         .close-btn:hover { color: #fff; }
 
-        /* --- FLASH --- */
         .flash { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: var(--theme-color); opacity: 0; pointer-events: none; z-index: 999; }
         .flash.fire { animation: slamFlash 0.5s ease-out; }
         @keyframes slamFlash { 0% { opacity: 0; } 10% { opacity: 1; } 100% { opacity: 0; } }
-
         body.terminal-active .scene, body.terminal-active .beam, body.terminal-active .projector-wrap { opacity: 0; pointer-events: none; }
     </style>
 </head>
@@ -115,7 +103,6 @@
 
     <div class="bg-orb"></div>
     <div class="bg-title">TRIXSWAP</div>
-
     <div class="beam" id="beam"></div>
 
     <div class="scene" id="scene">
@@ -132,211 +119,303 @@
         <div class="projector-text" id="p-text">TAP TO INITIALIZE</div>
     </div>
 
-    <!-- SWAP TERMINAL -->
+    <!-- ADVANCED SWAP TERMINAL -->
     <div class="swap-terminal" id="swap-terminal">
         <button class="close-btn" id="close-terminal">✖</button>
         <div class="terminal-header">ARC ROUTING PROTOCOL</div>
         
         <div class="swap-box">
-            <span class="swap-label">YOU PAY</span>
+            <div class="swap-label-row">
+                <span>YOU PAY</span>
+                <span>Balance: <span id="bal-from">0.0000</span> <button class="max-btn" id="max-btn">MAX</button></span>
+            </div>
             <div class="swap-row">
                 <input type="number" placeholder="0.0" id="pay-input">
                 <select id="pay-token">
-                    <option value="ARC">ARC</option>
-                    <option value="AVAX">AVAX</option>
-                    <option value="ETH">ETH</option>
                     <option value="USDC">USDC</option>
+                    <option value="EURC">EURC</option>
+                    <option value="CIRBTC">CIRBTC</option>
                 </select>
             </div>
-            <div class="swap-arrow">↓</div>
+            <div class="swap-arrow" id="flip-btn">↕</div>
         </div>
 
         <div class="swap-box" style="margin-top: -5px;">
-            <span class="swap-label">YOU RECEIVE</span>
+            <div class="swap-label-row">
+                <span>YOU RECEIVE</span>
+                <span>Balance: <span id="bal-to">0.0000</span></span>
+            </div>
             <div class="swap-row">
                 <input type="number" placeholder="0.0" id="receive-input" readonly>
                 <select id="receive-token">
+                    <option value="EURC">EURC</option>
                     <option value="USDC">USDC</option>
-                    <option value="USDT">USDT</option>
-                    <option value="ETH">ETH</option>
-                    <option value="ARC">ARC</option>
+                    <option value="CIRBTC">CIRBTC</option>
                 </select>
             </div>
         </div>
 
-        <button class="execute-btn" id="execute-swap-btn">CONFIRM TRANSACTION</button>
+        <div class="price-impact" id="rateLine"></div>
+
+        <button class="execute-btn" id="execute-swap-btn">CONNECT WALLET</button>
     </div>
 
     <div class="flash" id="flash"></div>
 
     <script>
-        // --- ARC NETWORK CONFIGURATION ---
-        const arcNetwork = {
-            chainId: '0x221', // Example ARC chain ID (Update with real one if needed)
-            chainName: 'ARC Network',
-            rpcUrls: ['https://rpc.arc.network'], // Ensure this matches actual ARC RPC
-            nativeCurrency: {
-                name: 'ARC',
-                symbol: 'ARC',
-                decimals: 18
-            },
-            blockExplorerUrls: ['https://explorer.arc.network']
+        // --- SMART CONTRACT DATA (From Abha-Fi) ---
+        const MULTISWAP_ADDRESS = "0xC71b9D161780AbA17D60b86D5d2Fb07F98DD5279";
+        const ARC_CHAIN_HEX = "0x4ced5a"; // 5042002 in hex
+        const MAX_UINT = ethers.constants.MaxUint256;
+
+        const TOKENS = {
+            USDC:   { address: "0x3600000000000000000000000000000000000000", decimals: 6 },
+            EURC:   { address: "0x89B50855Aa3bE2F677cD6303Cec089B5F319D72a", decimals: 6 },
+            CIRBTC: { address: "0xf0C4a4CE82A5746AbAAd9425360Ab04fbBA432BF", decimals: 8 }
         };
 
-        // --- WEB3 WALLET LOGIC ---
-        const walletBtn = document.getElementById('wallet-btn');
-        const walletAddressText = document.getElementById('wallet-address');
-        let userAddress = null;
+        const ERC20_ABI = [
+            "function balanceOf(address) view returns (uint256)",
+            "function allowance(address,address) view returns (uint256)",
+            "function approve(address,uint256) returns (bool)"
+        ];
+        const SWAP_ABI = [
+            "function getReserves(address,address) view returns (uint256,uint256)",
+            "function getAmountOut(uint256,uint256,uint256) pure returns (uint256)",
+            "function swap(address,address,uint256) returns (uint256)"
+        ];
 
+        // --- STATE VARIABLES ---
+        let provider, signer, userAddress;
+        let balances = {};
+        
+        const payInput = document.getElementById('pay-input');
+        const receiveInput = document.getElementById('receive-input');
+        const payTokenSelect = document.getElementById('pay-token');
+        const receiveTokenSelect = document.getElementById('receive-token');
+        const executeBtn = document.getElementById('execute-swap-btn');
+        const rateLine = document.getElementById('rateLine');
+
+        // --- WALLET & NETWORK ---
         async function connectWallet() {
             if (typeof window.ethereum !== 'undefined') {
                 try {
-                    walletAddressText.innerText = "CONNECTING...";
+                    executeBtn.innerText = "CONNECTING...";
                     const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
                     userAddress = accounts[0];
+                    provider = new ethers.providers.Web3Provider(window.ethereum);
 
-                    // FORCE SWITCH TO ARC NETWORK
-                    try {
-                        await window.ethereum.request({
-                            method: 'wallet_switchEthereumChain',
-                            params: [{ chainId: arcNetwork.chainId }],
-                        });
-                    } catch (switchError) {
-                        if (switchError.code === 4902) {
-                            try {
+                    // Switch to ARC Testnet
+                    const net = await provider.getNetwork();
+                    if (net.chainId !== 5042002) {
+                        try {
+                            await window.ethereum.request({ method: "wallet_switchEthereumChain", params: [{ chainId: ARC_CHAIN_HEX }] });
+                        } catch (switchErr) {
+                            if (switchErr.code === 4902) {
                                 await window.ethereum.request({
-                                    method: 'wallet_addEthereumChain',
-                                    params: [arcNetwork],
+                                    method: "wallet_addEthereumChain",
+                                    params: [{
+                                        chainId: ARC_CHAIN_HEX, chainName: "Arc Testnet",
+                                        nativeCurrency: { name: "USDC", symbol: "USDC", decimals: 18 },
+                                        rpcUrls: ["https://rpc.testnet.arc.network"],
+                                        blockExplorerUrls: ["https://testnet.arcscan.app"]
+                                    }]
                                 });
-                            } catch (addError) {
-                                console.error("Failed to add ARC", addError);
-                                walletAddressText.innerText = "NETWORK ERROR";
-                                setTimeout(() => walletAddressText.innerText = "CONNECT WALLET", 2000);
-                                return;
                             }
-                        } else {
-                            console.error("Switch rejected", switchError);
-                            walletAddressText.innerText = "NETWORK REJECTED";
-                            setTimeout(() => walletAddressText.innerText = "CONNECT WALLET", 2000);
-                            return;
                         }
                     }
 
-                    // Success
-                    walletBtn.classList.add('connected');
-                    walletAddressText.innerText = userAddress.slice(0, 6) + "..." + userAddress.slice(-4);
+                    signer = provider.getSigner();
+                    document.getElementById('wallet-btn').classList.add('connected');
+                    document.getElementById('wallet-address').innerText = userAddress.slice(0, 6) + "..." + userAddress.slice(-4);
+                    
+                    await refreshBalances();
+                    updateActionState();
                 } catch (error) {
-                    walletAddressText.innerText = "FAILED";
-                    setTimeout(() => walletAddressText.innerText = "CONNECT WALLET", 2000);
+                    executeBtn.innerText = "CONNECT WALLET";
                 }
-            } else {
-                alert("No Web3 Wallet detected! Please install MetaMask or Core Wallet.");
-            }
+            } else { alert("Please install MetaMask!"); }
         }
-        
-        walletBtn.addEventListener('click', () => { if (!userAddress) connectWallet(); });
+        document.getElementById('wallet-btn').addEventListener('click', () => { if (!userAddress) connectWallet(); });
 
-        // --- UI STATE MANAGEMENT ---
+        // --- FETCH BALANCES ---
+        function tokenContract(sym, runner) { return new ethers.Contract(TOKENS[sym].address, ERC20_ABI, runner); }
+        function parse(sym, val) { return ethers.utils.parseUnits(val.toString(), TOKENS[sym].decimals); }
+        function fmt(sym, raw) { return Number(ethers.utils.formatUnits(raw, TOKENS[sym].decimals)); }
+
+        async function refreshBalances() {
+            if (!userAddress) return;
+            for (const sym of Object.keys(TOKENS)) {
+                try {
+                    const bal = await tokenContract(sym, provider).balanceOf(userAddress);
+                    balances[sym] = fmt(sym, bal);
+                } catch(e) { balances[sym] = 0; }
+            }
+            document.getElementById('bal-from').innerText = balances[payTokenSelect.value]?.toFixed(4) || "0.0000";
+            document.getElementById('bal-to').innerText = balances[receiveTokenSelect.value]?.toFixed(4) || "0.0000";
+        }
+
+        payTokenSelect.addEventListener('change', () => { 
+            if(payTokenSelect.value === receiveTokenSelect.value) receiveTokenSelect.value = Object.keys(TOKENS).find(t => t !== payTokenSelect.value);
+            refreshBalances(); onAmountChange(); 
+        });
+        receiveTokenSelect.addEventListener('change', () => { 
+            if(receiveTokenSelect.value === payTokenSelect.value) payTokenSelect.value = Object.keys(TOKENS).find(t => t !== receiveTokenSelect.value);
+            refreshBalances(); onAmountChange(); 
+        });
+
+        document.getElementById('flip-btn').addEventListener('click', () => {
+            const temp = payTokenSelect.value;
+            payTokenSelect.value = receiveTokenSelect.value;
+            receiveTokenSelect.value = temp;
+            refreshBalances(); onAmountChange();
+        });
+
+        document.getElementById('max-btn').addEventListener('click', () => {
+            if(balances[payTokenSelect.value]) {
+                payInput.value = balances[payTokenSelect.value];
+                onAmountChange();
+            }
+        });
+
+        // --- LIVE MATH (AMM) ---
+        let estimateTimer;
+        payInput.addEventListener('input', () => { clearTimeout(estimateTimer); estimateTimer = setTimeout(onAmountChange, 300); });
+
+        async function onAmountChange() {
+            const val = payInput.value;
+            const fromSym = payTokenSelect.value;
+            const toSym = receiveTokenSelect.value;
+
+            if (!val || Number(val) <= 0 || !provider) {
+                receiveInput.value = ""; rateLine.innerText = "";
+                updateActionState(); return;
+            }
+
+            try {
+                const swap = new ethers.Contract(MULTISWAP_ADDRESS, SWAP_ABI, provider);
+                const [reserveIn, reserveOut] = await swap.getReserves(TOKENS[fromSym].address, TOKENS[toSym].address);
+                
+                if (reserveIn.eq(0) || reserveOut.eq(0)) {
+                    rateLine.innerText = "Pool has no liquidity."; updateActionState(); return;
+                }
+
+                const amtIn = parse(fromSym, val);
+                const out = await swap.getAmountOut(amtIn, reserveIn, reserveOut);
+                const outFormatted = fmt(toSym, out);
+                
+                receiveInput.value = outFormatted.toFixed(6);
+                rateLine.innerText = `1 ${fromSym} ≈ ${(outFormatted / Number(val)).toFixed(6)} ${toSym}`;
+            } catch (err) { receiveInput.value = ""; rateLine.innerText = "Route unavailable."; }
+            
+            updateActionState();
+        }
+
+        // --- APPROVE & SWAP ACTION ---
+        async function updateActionState() {
+            if (!userAddress) { 
+                executeBtn.innerText = "CONNECT WALLET"; executeBtn.classList.remove('warn'); 
+                executeBtn.onclick = connectWallet; return; 
+            }
+            
+            const val = payInput.value;
+            if (!val || Number(val) <= 0) { 
+                executeBtn.innerText = "ENTER AN AMOUNT"; executeBtn.disabled = true; executeBtn.classList.remove('warn'); return; 
+            }
+            
+            executeBtn.disabled = false;
+            try {
+                const c = tokenContract(payTokenSelect.value, provider);
+                const allowance = await c.allowance(userAddress, MULTISWAP_ADDRESS);
+                const amtIn = parse(payTokenSelect.value, val);
+
+                if (allowance.lt(amtIn)) {
+                    executeBtn.innerText = `APPROVE ${payTokenSelect.value}`;
+                    executeBtn.classList.add('warn');
+                    executeBtn.onclick = doApprove;
+                } else {
+                    executeBtn.innerText = "CONFIRM SWAP";
+                    executeBtn.classList.remove('warn');
+                    executeBtn.onclick = doSwap;
+                }
+            } catch(e) { console.error(e); }
+        }
+
+        async function doApprove() {
+            executeBtn.disabled = true; executeBtn.innerText = "APPROVING...";
+            try {
+                const c = tokenContract(payTokenSelect.value, signer);
+                const tx = await c.approve(MULTISWAP_ADDRESS, MAX_UINT);
+                await tx.wait();
+                updateActionState();
+            } catch(e) { updateActionState(); }
+        }
+
+        async function doSwap() {
+            executeBtn.disabled = true; executeBtn.innerText = "CONFIRMING TX...";
+            try {
+                const swap = new ethers.Contract(MULTISWAP_ADDRESS, SWAP_ABI, signer);
+                const amtIn = parse(payTokenSelect.value, payInput.value);
+                const tx = await swap.swap(TOKENS[payTokenSelect.value].address, TOKENS[receiveTokenSelect.value].address, amtIn);
+                await tx.wait();
+                
+                alert("Swap Successful!");
+                payInput.value = ""; receiveInput.value = ""; rateLine.innerText = "";
+                await refreshBalances();
+                updateActionState();
+            } catch(e) { updateActionState(); alert("Swap Failed!"); }
+        }
+
+        // --- HOLOGRAPHIC UI (Visuals) ---
         const body = document.body;
         const projector = document.getElementById('projector');
         const carousel = document.getElementById('carousel');
         const pText = document.getElementById('p-text');
         const flash = document.getElementById('flash');
-        
         const swapTerminal = document.getElementById('swap-terminal');
         const closeTerminalBtn = document.getElementById('close-terminal');
-        const executeSwapBtn = document.getElementById('execute-swap-btn');
-        
         let isOn = false; let rotationY = 0; let activeIndex = 0;
         const colors = ["#00ff66", "#00d4ff", "#b100ff", "#ffea00"];
 
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        function playBeep(freq, duration) {
-            if(audioCtx.state === 'suspended') audioCtx.resume();
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            osc.type = 'square';
-            osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-            osc.connect(gain); gain.connect(audioCtx.destination);
-            gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
-            osc.start(); osc.stop(audioCtx.currentTime + duration);
-        }
-
         function updateUI() {
             document.querySelectorAll('.holo-item').forEach((item, index) => {
-                if (index === activeIndex) item.classList.add('active');
-                else item.classList.remove('active');
+                if (index === activeIndex) item.classList.add('active'); else item.classList.remove('active');
             });
             document.documentElement.style.setProperty('--theme-color', colors[activeIndex]);
         }
 
         function executeSelection() {
-            if (!userAddress) { alert("Access Denied: Please Connect Wallet & Switch to ARC Network."); return; }
-            
-            playBeep(300, 0.4);
             flash.classList.add('fire');
-            
             setTimeout(() => {
                 flash.classList.remove('fire');
                 if (activeIndex === 0) {
-                    body.classList.add('terminal-active');
-                    swapTerminal.classList.add('open');
+                    body.classList.add('terminal-active'); swapTerminal.classList.add('open');
                 } else {
-                    isOn = false;
-                    body.classList.remove('is-on');
-                    pText.innerText = "TAP TO INITIALIZE";
+                    isOn = false; body.classList.remove('is-on'); pText.innerText = "TAP TO INITIALIZE";
                 }
             }, 150);
         }
 
         projector.addEventListener('click', () => {
-            if (!isOn) {
-                isOn = true; body.classList.add('is-on'); pText.innerText = "SCROLL MOUSE | TAP TO EXECUTE";
-                playBeep(600, 0.2); updateUI();
-            } else {
-                executeSelection();
-            }
+            if (!isOn) { isOn = true; body.classList.add('is-on'); pText.innerText = "SCROLL MOUSE | TAP TO EXECUTE"; updateUI(); } 
+            else { executeSelection(); }
         });
 
         document.querySelectorAll('.holo-item').forEach((item, index) => {
-            item.addEventListener('click', (e) => {
-                e.stopPropagation(); if (isOn && index === activeIndex) executeSelection();
-            });
+            item.addEventListener('click', (e) => { e.stopPropagation(); if (isOn && index === activeIndex) executeSelection(); });
         });
 
         window.addEventListener('wheel', (e) => {
             if (isOn && !body.classList.contains('terminal-active')) {
-                playBeep(1200, 0.05);
                 if (e.deltaY > 0) { rotationY -= 90; activeIndex = (activeIndex + 1) % 4; } 
                 else { rotationY += 90; activeIndex = (activeIndex - 1 + 4) % 4; }
-                carousel.style.transform = `rotateY(${rotationY}deg)`;
-                updateUI();
+                carousel.style.transform = `rotateY(${rotationY}deg)`; updateUI();
             }
         });
 
         closeTerminalBtn.addEventListener('click', () => {
-            swapTerminal.classList.remove('open');
-            body.classList.remove('terminal-active');
-            isOn = false; body.classList.remove('is-on');
-            pText.innerText = "TAP TO INITIALIZE";
-            playBeep(150, 0.3);
-        });
-
-        executeSwapBtn.addEventListener('click', () => {
-            if(!document.getElementById('pay-input').value) {
-                alert("Please enter an amount to swap!");
-                return;
-            }
-            executeSwapBtn.innerText = "PROCESSING ON ARC NETWORK...";
-            executeSwapBtn.style.background = "#fff";
-            
-            setTimeout(() => {
-                alert("ARC Transaction Confirmed!");
-                executeSwapBtn.innerText = "CONFIRM TRANSACTION";
-                executeSwapBtn.style.background = "var(--theme-color)";
-                closeTerminalBtn.click();
-            }, 2000);
+            swapTerminal.classList.remove('open'); body.classList.remove('terminal-active');
+            isOn = false; body.classList.remove('is-on'); pText.innerText = "TAP TO INITIALIZE";
         });
     </script>
 </body>
