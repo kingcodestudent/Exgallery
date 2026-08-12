@@ -3,324 +3,106 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>High Visibility Hologram - TrixSwap</title>
+    <title>TrixSwap - Live Routing</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
-    <!-- Ethers.js library for Wallet Connection -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
     
     <style>
-        :root {
-            --theme-color: #00ff66; /* Default Green */
-            --bg-color: #020202;
-        }
-
+        :root { --theme-color: #00ff66; --bg-color: #020202; }
         body {
-            background-color: var(--bg-color);
-            margin: 0;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            font-family: 'Orbitron', sans-serif;
-            overflow: hidden;
-            user-select: none;
-            /* Cyberpunk Scanlines */
-            background-image: repeating-linear-gradient(
-                0deg,
-                transparent,
-                transparent 2px,
-                rgba(255, 255, 255, 0.02) 3px,
-                transparent 4px
-            );
+            background-color: var(--bg-color); margin: 0; height: 100vh; display: flex; flex-direction: column;
+            justify-content: center; align-items: center; font-family: 'Orbitron', sans-serif; overflow: hidden; user-select: none;
+            background-image: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255, 255, 255, 0.02) 3px, transparent 4px);
             transition: background 0.5s ease;
         }
 
-        /* --- WALLET HUD (TOP RIGHT) --- */
+        /* --- WALLET HUD --- */
         .wallet-hud {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            padding: 10px 20px;
-            border: 1px solid rgba(255,255,255,0.2);
-            background: rgba(0,0,0,0.8);
-            color: #fff;
-            font-family: 'Share Tech Mono', monospace;
-            font-size: 14px;
-            border-radius: 5px;
-            cursor: pointer;
-            z-index: 100;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            transition: all 0.3s ease;
-            box-shadow: 0 0 10px rgba(0,255,102,0);
+            position: absolute; top: 20px; right: 20px; padding: 10px 20px; border: 1px solid rgba(255,255,255,0.2);
+            background: rgba(0,0,0,0.8); color: #fff; font-family: 'Share Tech Mono', monospace; font-size: 14px;
+            border-radius: 5px; cursor: pointer; z-index: 100; display: flex; align-items: center; gap: 10px; transition: all 0.3s ease;
         }
+        .wallet-hud.connected { border-color: var(--theme-color); box-shadow: 0 0 15px rgba(0,255,102,0.3); }
+        .status-dot { width: 8px; height: 8px; border-radius: 50%; background: #ff3333; box-shadow: 0 0 8px #ff3333; }
+        .wallet-hud.connected .status-dot { background: var(--theme-color); box-shadow: 0 0 8px var(--theme-color); }
 
-        .wallet-hud:hover {
-            border-color: var(--theme-color);
-            box-shadow: 0 0 15px rgba(0,255,102,0.3);
+        /* --- LIVE PRICE HUD (NEW) --- */
+        .price-hud {
+            position: absolute; top: 25%; font-family: 'Share Tech Mono', monospace; font-size: 16px;
+            color: var(--theme-color); text-shadow: 0 0 10px var(--theme-color); opacity: 0;
+            transition: opacity 0.3s; z-index: 60; text-align: center;
         }
+        body.is-on .price-hud { opacity: 1; }
+        .fetching { animation: pulse 1s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
 
-        .status-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: #ff3333; /* Red when disconnected */
-            box-shadow: 0 0 8px #ff3333;
-        }
+        /* --- BACKGROUND DECORATION --- */
+        .bg-orb { position: absolute; top: 50%; left: 50%; width: 500px; height: 500px; transform: translate(-50%, -50%); border-radius: 50%; background: radial-gradient(circle, var(--theme-color) 0%, transparent 70%); opacity: 0.06; z-index: 1; transition: background 0.3s; pointer-events: none; }
+        .bg-title { position: absolute; top: 12%; font-size: 42px; font-weight: 900; letter-spacing: 12px; color: var(--theme-color); opacity: 0.9; text-shadow: 0 0 20px var(--theme-color); z-index: 5; }
+        body.is-on .bg-title { opacity: 0.15; }
 
-        .wallet-hud.connected .status-dot {
-            background: #00ff66; /* Green when connected */
-            box-shadow: 0 0 8px #00ff66;
-        }
+        /* --- PROJECTOR BASE & BEAM --- */
+        .projector-wrap { position: absolute; bottom: 50px; display: flex; flex-direction: column; align-items: center; cursor: pointer; z-index: 50; }
+        .projector { width: 80px; height: 25px; background: #fff; border-radius: 50%; box-shadow: 0 0 30px var(--theme-color), 0 0 60px var(--theme-color); transition: box-shadow 0.3s; }
+        .projector-text { margin-top: 12px; color: var(--theme-color); font-size: 12px; letter-spacing: 4px; transition: color 0.3s; }
+        .beam { position: absolute; bottom: 60px; width: 350px; height: 400px; background: linear-gradient(to top, rgba(255,255,255,0.1), transparent); clip-path: polygon(50% 100%, 0 0, 100% 0); opacity: 0; transform-origin: bottom center; transition: opacity 0.5s; pointer-events: none; }
+        body.is-on .beam { opacity: 1; }
 
-        /* --- IDLE BACKGROUND DECORATION (so screen isn't blank) --- */
-        .bg-title {
-            position: absolute;
-            top: 12%;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 42px;
-            font-weight: 900;
-            letter-spacing: 12px;
-            color: var(--theme-color);
-            opacity: 0.9;
-            text-shadow: 0 0 20px var(--theme-color), 0 0 50px var(--theme-color);
-            z-index: 5;
-            transition: color 0.3s, text-shadow 0.3s;
-        }
+        /* --- 3D CAROUSEL --- */
+        .scene { position: absolute; top: 35%; width: 300px; height: 200px; perspective: 1000px; opacity: 0; transition: opacity 0.4s; pointer-events: none; }
+        body.is-on .scene { opacity: 1; }
+        .carousel { width: 100%; height: 100%; position: absolute; transform-style: preserve-3d; transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .holo-item { position: absolute; width: 160px; height: 120px; left: 50%; top: 50%; margin-left: -80px; margin-top: -60px; display: flex; flex-direction: column; justify-content: center; align-items: center; opacity: 0.1; filter: blur(4px); transition: all 0.5s; }
+        .holo-item .icon { font-size: 70px; margin-bottom: 10px; line-height: 1; }
+        .holo-item .name { font-size: 22px; font-weight: 900; letter-spacing: 3px; }
 
-        .bg-subtitle {
-            position: absolute;
-            top: 20%;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 11px;
-            letter-spacing: 6px;
-            color: rgba(255,255,255,0.35);
-            z-index: 5;
-        }
+        .item-0 { transform: rotateY(0deg) translateZ(180px); color: #00ff66; text-shadow: 0 0 20px #00ff66; }
+        .item-1 { transform: rotateY(90deg) translateZ(180px); color: #00d4ff; text-shadow: 0 0 20px #00d4ff; }
+        .item-2 { transform: rotateY(180deg) translateZ(180px); color: #b100ff; text-shadow: 0 0 20px #b100ff; }
+        .item-3 { transform: rotateY(270deg) translateZ(180px); color: #ffea00; text-shadow: 0 0 20px #ffea00; }
 
-        .bg-grid {
-            position: absolute;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            background-image:
-                linear-gradient(rgba(0, 255, 102, 0.06) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(0, 255, 102, 0.06) 1px, transparent 1px);
-            background-size: 45px 45px;
-            z-index: 1;
-            pointer-events: none;
-            -webkit-mask-image: radial-gradient(circle at center, black 0%, transparent 75%);
-            mask-image: radial-gradient(circle at center, black 0%, transparent 75%);
-        }
-
-        .bg-orb {
-            position: absolute;
-            top: 50%; left: 50%;
-            width: 500px; height: 500px;
-            transform: translate(-50%, -50%);
-            border-radius: 50%;
-            background: radial-gradient(circle, var(--theme-color) 0%, transparent 70%);
-            opacity: 0.06;
-            z-index: 1;
-            pointer-events: none;
-            transition: background 0.3s ease;
-        }
-
-        /* --- THE PROJECTOR BASE --- */
-        .projector-wrap {
-            position: absolute;
-            bottom: 50px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            cursor: pointer;
-            z-index: 50;
-        }
-
-        .projector {
-            width: 80px;
-            height: 25px;
-            background: #fff;
-            border-radius: 50%;
-            box-shadow: 0 0 30px var(--theme-color), 0 0 60px var(--theme-color);
-            transition: box-shadow 0.3s ease;
-        }
-
-        .projector-text {
-            margin-top: 12px;
-            color: var(--theme-color);
-            font-size: 12px;
-            letter-spacing: 4px;
-            white-space: nowrap;
-            transition: color 0.3s;
-        }
-
-        /* --- LIGHT CONE --- */
-        .beam {
-            position: absolute;
-            bottom: 60px;
-            width: 350px;
-            height: 400px;
-            background: linear-gradient(to top, rgba(255,255,255,0.1), transparent);
-            clip-path: polygon(50% 100%, 0 0, 100% 0);
-            opacity: 0;
-            transform-origin: bottom center;
-            transition: opacity 0.5s ease, background 0.3s ease;
-            pointer-events: none;
-        }
-
-        /* --- 3D SCENE & CAROUSEL --- */
-        .scene {
-            position: absolute;
-            top: 25%;
-            width: 300px;
-            height: 200px;
-            perspective: 1000px; /* Gives the 3D depth */
-            opacity: 0;
-            transition: opacity 0.4s ease;
-            pointer-events: none;
-        }
-
-        .carousel {
-            width: 100%;
-            height: 100%;
-            position: absolute;
-            transform-style: preserve-3d;
-            transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-
-        /* --- THE HOLOGRAM ITEMS --- */
-        .holo-item {
-            position: absolute;
-            width: 160px;
-            height: 120px;
-            left: 50%;
-            top: 50%;
-            margin-left: -80px;
-            margin-top: -60px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            /* Default blurred and dim for background items */
-            opacity: 0.1;
-            filter: blur(4px);
-            transition: all 0.5s ease;
-        }
-
-        .holo-item .icon {
-            font-size: 70px;
-            margin-bottom: 10px;
-            line-height: 1;
-        }
-
-        .holo-item .name {
-            font-size: 22px;
-            font-weight: 900;
-            letter-spacing: 3px;
-        }
-
-        /* Positioning the 4 items in a 3D circle (Cylinder) */
-        /* TranslateZ pushes them away from the center so they form a ring */
-        .item-0 { transform: rotateY(0deg) translateZ(180px); color: #00ff66; text-shadow: 0 0 20px #00ff66; } /* Swap - Green */
-        .item-1 { transform: rotateY(90deg) translateZ(180px); color: #00d4ff; text-shadow: 0 0 20px #00d4ff; } /* Bridge - Blue */
-        .item-2 { transform: rotateY(180deg) translateZ(180px); color: #b100ff; text-shadow: 0 0 20px #b100ff; } /* Cross - Purple */
-        .item-3 { transform: rotateY(270deg) translateZ(180px); color: #ffea00; text-shadow: 0 0 20px #ffea00; } /* Pools - Yellow */
-
-        /* ACTIVE ITEM (The one facing the front) */
-        .holo-item.active {
-            opacity: 1;
-            filter: blur(0px);
-            transform: scale(1.2); /* Make the front one slightly bigger */
-            pointer-events: auto;
-            cursor: pointer;
-        }
-        
-        /* Must re-apply the rotation and translate for the active scale to work properly */
+        .holo-item.active { opacity: 1; filter: blur(0px); transform: scale(1.2); pointer-events: auto; cursor: pointer; }
         .item-0.active { transform: rotateY(0deg) translateZ(180px) scale(1.3); }
         .item-1.active { transform: rotateY(90deg) translateZ(180px) scale(1.3); }
         .item-2.active { transform: rotateY(180deg) translateZ(180px) scale(1.3); }
         .item-3.active { transform: rotateY(270deg) translateZ(180px) scale(1.3); }
 
-        /* --- ACTIVE STATE TRIGGERS --- */
-        body.is-on .scene { opacity: 1; }
-        body.is-on .beam { opacity: 1; }
-        body.is-on .projector-text { content: 'SCROLL TO NAVIGATE | TAP TO EXECUTE'; color: #fff; }
-        body.is-on .bg-title,
-        body.is-on .bg-subtitle { opacity: 0.15; }
-        body.is-on .bg-grid { opacity: 0.4; }
-
         /* --- PLASMA FLASH --- */
-        .flash {
-            position: fixed;
-            top: 0; left: 0; width: 100vw; height: 100vh;
-            background: var(--theme-color);
-            opacity: 0;
-            pointer-events: none;
-            z-index: 999;
-        }
+        .flash { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: var(--theme-color); opacity: 0; pointer-events: none; z-index: 999; }
         .flash.fire { animation: slamFlash 0.6s ease-out; }
-
-        @keyframes slamFlash {
-            0% { opacity: 0; }
-            15% { opacity: 1; }
-            100% { opacity: 0; }
-        }
+        @keyframes slamFlash { 0% { opacity: 0; } 15% { opacity: 1; } 100% { opacity: 0; } }
     </style>
 </head>
 <body>
 
-    <!-- WALLET CONNECTION HUD -->
+    <!-- WALLET CONNECT -->
     <div class="wallet-hud" id="wallet-btn">
         <div class="status-dot"></div>
         <span id="wallet-address">CONNECT WALLET</span>
     </div>
 
-    <!-- Idle Background Decoration -->
     <div class="bg-orb"></div>
-    <div class="bg-grid"></div>
     <div class="bg-title">TRIXSWAP</div>
-    <div class="bg-subtitle">OMNIVERSE LIQUIDITY ENGINE</div>
 
-    <!-- Holographic Beam -->
-    <div class="beam" id="beam"></div>
+    <!-- LIVE DATA HUD -->
+    <div class="price-hud" id="price-hud">SYS: STANDBY</div>
 
-    <!-- 3D Carousel Scene -->
+    <div class="beam"></div>
+
     <div class="scene">
         <div class="carousel" id="carousel">
-            <!-- Item 0 faces front at 0deg -->
-            <div class="holo-item item-0" id="h-0">
-                <div class="icon">⇆</div>
-                <div class="name">SWAP</div>
-            </div>
-            <!-- Item 1 faces front at -90deg -->
-            <div class="holo-item item-1" id="h-1">
-                <div class="icon">🔗</div>
-                <div class="name">BRIDGE</div>
-            </div>
-            <!-- Item 2 faces front at -180deg -->
-            <div class="holo-item item-2" id="h-2">
-                <div class="icon">🌐</div>
-                <div class="name">CROSS</div>
-            </div>
-            <!-- Item 3 faces front at -270deg -->
-            <div class="holo-item item-3" id="h-3">
-                <div class="icon">💧</div>
-                <div class="name">POOLS</div>
-            </div>
+            <div class="holo-item item-0 active"><div class="icon">⇆</div><div class="name">SWAP AVAX</div></div>
+            <div class="holo-item item-1"><div class="icon">⇆</div><div class="name">SWAP ETH</div></div>
+            <div class="holo-item item-2"><div class="icon">🌐</div><div class="name">CROSS</div></div>
+            <div class="holo-item item-3"><div class="icon">💧</div><div class="name">POOLS</div></div>
         </div>
     </div>
 
-    <!-- The Base Button (logo + text both clickable) -->
     <div class="projector-wrap" id="projector">
         <div class="projector"></div>
         <div class="projector-text" id="p-text">TAP TO INITIALIZE</div>
     </div>
 
-    <!-- Transformation Flash -->
     <div class="flash" id="flash"></div>
 
     <script>
@@ -335,133 +117,88 @@
                     walletAddressText.innerText = "CONNECTING...";
                     const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
                     userAddress = accounts[0];
-                    const provider = new ethers.providers.Web3Provider(window.ethereum);
-                    
                     walletBtn.classList.add('connected');
-                    const shortAddress = userAddress.slice(0, 6) + "..." + userAddress.slice(-4);
-                    walletAddressText.innerText = shortAddress;
-                    console.log("Connected Successfully:", userAddress);
+                    walletAddressText.innerText = userAddress.slice(0, 6) + "..." + userAddress.slice(-4);
                 } catch (error) {
-                    console.error("Connection failed", error);
                     walletAddressText.innerText = "CONNECTION FAILED";
                     setTimeout(() => walletAddressText.innerText = "CONNECT WALLET", 2000);
                 }
             } else {
-                alert("No Web3 Wallet detected! Please install MetaMask or Core Wallet.");
+                alert("No Web3 Wallet detected!");
             }
         }
-
-        walletBtn.addEventListener('click', () => {
-            if (!userAddress) connectWallet();
-        });
-
+        walletBtn.addEventListener('click', () => { if (!userAddress) connectWallet(); });
 
         // --- HOLOGRAPHIC UI LOGIC ---
         const body = document.body;
         const projector = document.getElementById('projector');
         const carousel = document.getElementById('carousel');
         const pText = document.getElementById('p-text');
+        const priceHud = document.getElementById('price-hud');
         const flash = document.getElementById('flash');
-        const root = document.documentElement;
         
-        let isOn = false;
-        let rotationY = 0;
-        let activeIndex = 0;
-
-        // Colors mapping for the UI glow
+        let isOn = false; let rotationY = 0; let activeIndex = 0;
         const colors = ["#00ff66", "#00d4ff", "#b100ff", "#ffea00"];
 
-        // Audio Setup
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        function playBeep(freq, duration) {
-            if(audioCtx.state === 'suspended') audioCtx.resume();
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            osc.type = 'square';
-            osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-            osc.connect(gain); gain.connect(audioCtx.destination);
-            gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
-            osc.start(); osc.stop(audioCtx.currentTime + duration);
+        // --- LIVE DATA FETCHER ---
+        async function fetchLivePrice(asset) {
+            priceHud.classList.add('fetching');
+            priceHud.innerText = `SCANNING LIQUIDITY POOLS FOR ${asset}...`;
+            
+            try {
+                // Using a public API just for live visualization
+                let symbol = asset === 'AVAX' ? 'AVAXUSDT' : 'ETHUSDT';
+                const response = await fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${symbol}`);
+                const data = await response.json();
+                
+                // Format price to 2 decimal places
+                const price = parseFloat(data.price).toFixed(2);
+                
+                priceHud.classList.remove('fetching');
+                priceHud.innerText = `OPTIMAL ROUTE FOUND: 1 ${asset} = $${price} USDC`;
+            } catch (error) {
+                priceHud.classList.remove('fetching');
+                priceHud.innerText = `ROUTING ERROR. NO LIQUIDITY.`;
+            }
         }
 
         function updateUI() {
-            // Apply active class to the current front item
             document.querySelectorAll('.holo-item').forEach((item, index) => {
-                if (index === activeIndex) {
-                    item.classList.add('active');
-                } else {
-                    item.classList.remove('active');
-                }
+                if (index === activeIndex) item.classList.add('active');
+                else item.classList.remove('active');
             });
+            document.documentElement.style.setProperty('--theme-color', colors[activeIndex]);
 
-            // Change global theme color based on active item
-            root.style.setProperty('--theme-color', colors[activeIndex]);
+            // Trigger Live Price Fetch based on selection
+            if (activeIndex === 0) fetchLivePrice('AVAX');
+            else if (activeIndex === 1) fetchLivePrice('ETH');
+            else priceHud.innerText = `SYS: READY FOR ${document.querySelectorAll('.holo-item')[activeIndex].innerText.replace('\n', ' ')}`;
         }
-
-        // 3. CLICK ON ACTIVE HOLOGRAM ITEM TO EXECUTE DIRECTLY
-        document.querySelectorAll('.holo-item').forEach((item, index) => {
-            item.addEventListener('click', (e) => {
-                e.stopPropagation();
-                if (isOn && index === activeIndex) {
-                    executeSelection();
-                }
-            });
-        });
 
         function executeSelection() {
-            // Wallet Check before execution
-            if (!userAddress) {
-                alert("Access Denied: Please Connect Wallet First.");
-                return;
-            }
-
-            playBeep(200, 0.5);
+            if (!userAddress) { alert("Access Denied: Please Connect Wallet First."); return; }
             flash.classList.add('fire');
-
-            isOn = false;
-            body.classList.remove('is-on');
-            pText.innerText = "EXECUTING...";
-
-            setTimeout(() => {
-                flash.classList.remove('fire');
-                pText.innerText = "TAP TO INITIALIZE";
-            }, 600);
+            isOn = false; body.classList.remove('is-on');
+            pText.innerText = "EXECUTING TX ON-CHAIN...";
+            setTimeout(() => { flash.classList.remove('fire'); pText.innerText = "TAP TO INITIALIZE"; }, 600);
         }
 
-        // 1. TURN ON / EXECUTE
         projector.addEventListener('click', () => {
-            if (!isOn) {
-                // Turn On
-                isOn = true;
-                body.classList.add('is-on');
-                pText.innerText = "SCROLL MOUSE | TAP TO EXECUTE";
-                playBeep(600, 0.2);
-                updateUI();
-            } else {
-                // Execute (Slam)
-                executeSelection();
-            }
+            if (!isOn) { isOn = true; body.classList.add('is-on'); pText.innerText = "SCROLL MOUSE | TAP TO EXECUTE"; updateUI(); } 
+            else { executeSelection(); }
         });
 
-        // 2. SCROLL TO ROTATE
+        document.querySelectorAll('.holo-item').forEach((item, index) => {
+            item.addEventListener('click', (e) => {
+                e.stopPropagation(); if (isOn && index === activeIndex) executeSelection();
+            });
+        });
+
         window.addEventListener('wheel', (e) => {
             if (isOn) {
-                playBeep(1200, 0.05); // Tick sound
-                
-                if (e.deltaY > 0) {
-                    // Scroll down -> rotate carousel left
-                    rotationY -= 90;
-                    activeIndex = (activeIndex + 1) % 4;
-                } else {
-                    // Scroll up -> rotate carousel right
-                    rotationY += 90;
-                    activeIndex = (activeIndex - 1 + 4) % 4;
-                }
-                
-                // Apply rotation to the entire carousel
+                if (e.deltaY > 0) { rotationY -= 90; activeIndex = (activeIndex + 1) % 4; } 
+                else { rotationY += 90; activeIndex = (activeIndex - 1 + 4) % 4; }
                 carousel.style.transform = `rotateY(${rotationY}deg)`;
-                
                 updateUI();
             }
         });
