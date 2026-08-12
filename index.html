@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TrixSwap - Omnitrix Full Protocol</title>
+    <title>TrixSwap - Cinematic Omniverse</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
     
@@ -15,6 +15,21 @@
             justify-content: center; align-items: center; font-family: 'Orbitron', sans-serif; overflow: hidden; user-select: none;
             background-image: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255, 255, 255, 0.02) 3px, transparent 4px);
         }
+
+        /* --- CINEMATIC INTRO VIDEO OVERLAY --- */
+        .intro-overlay {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #000;
+            z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center;
+            transition: opacity 0.8s ease; cursor: pointer;
+        }
+        .intro-overlay video { width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; }
+        .skip-intro {
+            position: absolute; bottom: 30px; padding: 10px 25px; background: rgba(0,255,102,0.2);
+            border: 1px solid var(--theme-color); color: var(--theme-color); font-family: 'Orbitron', sans-serif;
+            font-weight: bold; border-radius: 8px; cursor: pointer; z-index: 10000; letter-spacing: 2px;
+            box-shadow: 0 0 15px rgba(0,255,102,0.3); transition: 0.3s;
+        }
+        .skip-intro:hover { background: var(--theme-color); color: #000; }
 
         /* --- WALLET HUD --- */
         .wallet-hud {
@@ -102,7 +117,6 @@
         .close-btn { position: absolute; top: 15px; right: 15px; background: transparent; color: #aaa; border: none; cursor: pointer; font-size: 20px; }
         .close-btn:hover { color: #fff; }
 
-        /* General UI components */
         .swap-box { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 15px; margin-bottom: 15px; position: relative; }
         .swap-label-row { display: flex; justify-content: space-between; font-size: 12px; color: #aaa; margin-bottom: 8px; }
         .max-btn { background: rgba(0,255,102,0.2); border: 1px solid var(--theme-color); color: var(--theme-color); border-radius: 4px; padding: 2px 6px; cursor: pointer; font-family: 'Orbitron', sans-serif; font-size: 10px; margin-left: 10px; }
@@ -116,7 +130,6 @@
         .execute-btn:hover { box-shadow: 0 0 25px var(--theme-color); }
         .execute-btn.ghost { background: transparent; border: 1px solid var(--theme-color); color: var(--theme-color); }
 
-        /* Lending & Borrow Rows */
         .token-row { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 12px; margin-bottom: 12px; }
         .token-row-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-size: 13px; }
         .token-chip { display: flex; align-items: center; gap: 8px; font-weight: bold; }
@@ -124,7 +137,6 @@
         .token-stats { font-size: 11px; color: #aaa; text-align: right; line-height: 1.3; }
         .btn-row { display: flex; gap: 8px; margin-top: 10px; }
 
-        /* Faucet Card */
         .faucet-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 15px; margin-bottom: 12px; }
         .faucet-title { font-size: 14px; font-weight: bold; color: #fff; margin-bottom: 6px; display: flex; align-items: center; gap: 8px; }
         .faucet-desc { font-size: 12px; color: #aaa; margin-bottom: 12px; line-height: 1.4; }
@@ -138,6 +150,16 @@
     </style>
 </head>
 <body>
+
+    <!-- CINEMATIC VIDEO INTRO OVERLAY -->
+    <div class="intro-overlay" id="intro-overlay">
+        <!-- Aap yahan apni video ka direct link ya local path daal sakte hain -->
+        <video id="intro-video" autoplay muted playsinline>
+            <source src="https://assets.mixkit.co/videos/preview/mixkit-digital-animation-of-screens-and-numbers-31917-large.mp4" type="video/mp4">
+            Your browser does not support video.
+        </video>
+        <button class="skip-intro" onclick="closeIntro()">INITIALIZE TRIXSWAP ➔</button>
+    </div>
 
     <div class="wallet-hud" id="wallet-btn">
         <div class="status-dot"></div>
@@ -280,6 +302,19 @@
     <div class="flash" id="flash"></div>
 
     <script>
+        // --- INTRO VIDEO LOGIC ---
+        function closeIntro() {
+            const overlay = document.getElementById('intro-overlay');
+            overlay.style.opacity = '0';
+            setTimeout(() => {
+                overlay.style.display = 'none';
+            }, 800);
+        }
+        
+        // Auto close after video ends or plays for 5 seconds
+        const introVideo = document.getElementById('intro-video');
+        introVideo.onended = () => { closeIntro(); };
+
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         function playTickSound() {
             if (audioCtx.state === 'suspended') audioCtx.resume();
@@ -389,7 +424,7 @@
         }
 
         payTokenSelect.addEventListener('change', () => { if(payTokenSelect.value === receiveTokenSelect.value) receiveTokenSelect.value = TOKEN_LIST.find(t => t !== payTokenSelect.value); refreshBalances(); onAmountChange(); });
-        receiveTokenSelect.addEventListener('change', () => { if(receiveTokenSelect.value === payTokenSelect.value) payTokenSelect.value = TOKEN_LIST.find(t => t !== receiveTokenSelect.value); refreshBalances(); onAmountChange(); });
+        receiveTokenSelect.addEventListener('change', () => { if(receiveTokenSelect.value === payTokenSelect.value) payTokenSelect.value = TOKEN_LIST.find(t => t !== payTokenSelect.value); refreshBalances(); onAmountChange(); });
         document.getElementById('flip-btn').addEventListener('click', () => { const temp = payTokenSelect.value; payTokenSelect.value = receiveTokenSelect.value; receiveTokenSelect.value = temp; refreshBalances(); onAmountChange(); });
         document.getElementById('max-btn').addEventListener('click', () => { if(balances[payTokenSelect.value]) { payInput.value = balances[payTokenSelect.value]; onAmountChange(); }});
 
@@ -435,7 +470,6 @@
             } catch(e) { updateActionState(); alert("Swap Failed!"); }
         }
 
-        // --- LEND & BORROW CONTRACT LOGIC ---
         async function ensureApproval(sym, spender, neededAmount) {
             const c = tokenContract(sym, signer);
             const allowance = await c.allowance(userAddress, spender);
@@ -614,7 +648,6 @@
             } catch(e) { alert("Repay Failed!"); }
         }
 
-        // --- POOL LOGIC ---
         function poolPair() {
             const val = document.getElementById('poolSelect').value;
             return val === "USDC-EURC" ? ["USDC","EURC"] : val === "USDC-CIRBTC" ? ["USDC","CIRBTC"] : ["EURC","CIRBTC"];
@@ -670,7 +703,6 @@
             } catch(e) { alert("Adding Liquidity Failed!"); liqBtn.disabled = false; liqBtn.innerText = "ADD LIQUIDITY"; }
         }
 
-        // --- OMNITRIX DIAL LOGIC ---
         const body = document.body;
         const projector = document.getElementById('projector');
         const pText = document.getElementById('p-text');
