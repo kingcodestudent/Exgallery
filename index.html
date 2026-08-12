@@ -102,7 +102,7 @@
         .close-btn { position: absolute; top: 15px; right: 15px; background: transparent; color: #aaa; border: none; cursor: pointer; font-size: 20px; }
         .close-btn:hover { color: #fff; }
 
-        /* Swap Specifics */
+        /* Swap & Pool Box Common */
         .swap-box { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 15px; margin-bottom: 15px; position: relative; }
         .swap-label-row { display: flex; justify-content: space-between; font-size: 12px; color: #aaa; margin-bottom: 8px; }
         .max-btn { background: rgba(0,255,102,0.2); border: 1px solid var(--theme-color); color: var(--theme-color); border-radius: 4px; padding: 2px 6px; cursor: pointer; font-family: 'Orbitron', sans-serif; font-size: 10px; margin-left: 10px; }
@@ -116,7 +116,7 @@
         .execute-btn:hover { box-shadow: 0 0 25px var(--theme-color); }
         .execute-btn.warn { background: transparent; border: 2px solid #ffea00; color: #ffea00; }
 
-        /* Faucet Specifics (Matching user image) */
+        /* Faucet Card */
         .faucet-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 15px; margin-bottom: 12px; }
         .faucet-title { font-size: 14px; font-weight: bold; color: #fff; margin-bottom: 6px; display: flex; align-items: center; gap: 8px; }
         .faucet-desc { font-size: 12px; color: #aaa; margin-bottom: 12px; line-height: 1.4; }
@@ -196,6 +196,48 @@
         <button class="execute-btn" id="execute-swap-btn">CONNECT WALLET</button>
     </div>
 
+    <!-- POOL TERMINAL (ADDED NOW) -->
+    <div class="terminal-box" id="pool-terminal">
+        <button class="close-btn" onclick="closeTerminals()">✖</button>
+        <div class="terminal-header">LIQUIDITY PROTOCOL</div>
+        
+        <div class="swap-box">
+            <div class="swap-label-row">
+                <span>SELECT POOL</span>
+            </div>
+            <div class="swap-row" style="margin-bottom: 10px;">
+                <select id="poolSelect" style="width: 100%; padding: 10px;">
+                    <option value="USDC-EURC">USDC / EURC</option>
+                    <option value="USDC-CIRBTC">USDC / CIRBTC</option>
+                    <option value="EURC-CIRBTC">EURC / CIRBTC</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="swap-box">
+            <div class="swap-label-row">
+                <span id="liqTokenALabel">USDC</span>
+                <span>Balance: <span id="liqBalanceA">0.0000</span></span>
+            </div>
+            <div class="swap-row">
+                <input type="number" placeholder="0.0" id="liqAmountA">
+            </div>
+        </div>
+
+        <div class="swap-box" style="margin-top: -5px;">
+            <div class="swap-label-row">
+                <span id="liqTokenBLabel">EURC</span>
+                <span>Balance: <span id="liqBalanceB">0.0000</span></span>
+            </div>
+            <div class="swap-row">
+                <input type="number" placeholder="0.0" id="liqAmountB">
+            </div>
+        </div>
+
+        <div class="price-impact" id="liqReservesLine">Reserves: Loading...</div>
+        <button class="execute-btn" id="liqActionBtn">CONNECT WALLET</button>
+    </div>
+
     <!-- FAUCET TERMINAL -->
     <div class="terminal-box" id="faucet-terminal">
         <button class="close-btn" onclick="closeTerminals()">✖</button>
@@ -248,7 +290,12 @@
         };
 
         const ERC20_ABI = ["function balanceOf(address) view returns (uint256)", "function allowance(address,address) view returns (uint256)", "function approve(address,uint256) returns (bool)"];
-        const SWAP_ABI = ["function getReserves(address,address) view returns (uint256,uint256)", "function getAmountOut(uint256,uint256,uint256) pure returns (uint256)", "function swap(address,address,uint256) returns (uint256)"];
+        const SWAP_ABI = [
+            "function getReserves(address,address) view returns (uint256,uint256)", 
+            "function getAmountOut(uint256,uint256,uint256) pure returns (uint256)", 
+            "function swap(address,address,uint256) returns (uint256)",
+            "function addLiquidity(address,address,uint256,uint256)"
+        ];
 
         let provider, signer, userAddress;
         let balances = {};
@@ -288,6 +335,7 @@
                     
                     await refreshBalances();
                     updateActionState();
+                    renderLiquidityPanel();
                 } catch (error) { executeBtn.innerText = "CONNECT WALLET"; }
             } else { alert("Please install MetaMask!"); }
         }
@@ -307,6 +355,7 @@
             }
             document.getElementById('bal-from').innerText = balances[payTokenSelect.value]?.toFixed(4) || "0.0000";
             document.getElementById('bal-to').innerText = balances[receiveTokenSelect.value]?.toFixed(4) || "0.0000";
+            renderLiquidityPanel();
         }
 
         payTokenSelect.addEventListener('change', () => { if(payTokenSelect.value === receiveTokenSelect.value) receiveTokenSelect.value = Object.keys(TOKENS).find(t => t !== payTokenSelect.value); refreshBalances(); onAmountChange(); });
@@ -356,12 +405,71 @@
             } catch(e) { updateActionState(); alert("Swap Failed!"); }
         }
 
+        // --- POOL LOGIC ---
+        function poolPair() {
+            const val = document.getElementById('poolSelect').value;
+            return val === "USDC-EURC" ? ["USDC","EURC"] : val === "USDC-CIRBTC" ? ["USDC","CIRBTC"] : ["EURC","CIRBTC"];
+        }
+        document.getElementById('poolSelect').addEventListener('change', renderLiquidityPanel);
+
+        async function renderLiquidityPanel() {
+            const [a, b] = poolPair();
+            document.getElementById('liqTokenALabel').innerText = a;
+            document.getElementById('liqTokenBLabel').innerText = b;
+            document.getElementById('liqBalanceA').innerText = (balances[a] !== undefined ? balances[a].toFixed(4) : "0.0000");
+            document.getElementById('liqBalanceB').innerText = (balances[b] !== undefined ? balances[b].toFixed(4) : "0.0000");
+            
+            const liqBtn = document.getElementById('liqActionBtn');
+            if (!userAddress) { liqBtn.innerText = "CONNECT WALLET"; liqBtn.onclick = connectWallet; return; }
+            
+            liqBtn.innerText = "ADD LIQUIDITY";
+            liqBtn.onclick = doAddLiquidity;
+
+            if (provider) {
+                try {
+                    const swap = new ethers.Contract(MULTISWAP_ADDRESS, SWAP_ABI, provider);
+                    const [rA, rB] = await swap.getReserves(TOKENS[a].address, TOKENS[b].address);
+                    document.getElementById('liqReservesLine').innerText = `Reserves — ${fmt(a,rA).toFixed(4)} ${a} ⇌ ${fmt(b,rB).toFixed(4)} ${b}`;
+                } catch(e) { document.getElementById('liqReservesLine').innerText = "Reserves unavailable"; }
+            }
+        }
+
+        async function doAddLiquidity() {
+            const [a, b] = poolPair();
+            const va = document.getElementById('liqAmountA').value;
+            const vb = document.getElementById('liqAmountB').value;
+            if(!va || !vb || Number(va) <= 0 || Number(vb) <= 0) { alert("Enter valid amounts!"); return; }
+            
+            const liqBtn = document.getElementById('liqActionBtn');
+            liqBtn.disabled = true; liqBtn.innerText = "PROCESSING LIQUIDITY...";
+            try {
+                const amtA = parse(a, va);
+                const amtB = parse(b, vb);
+                
+                // Approve both tokens
+                const cA = tokenContract(a, signer);
+                const cB = tokenContract(b, signer);
+                if((await cA.allowance(userAddress, MULTISWAP_ADDRESS)).lt(amtA)) { await (await cA.approve(MULTISWAP_ADDRESS, MAX_UINT)).wait(); }
+                if((await cB.allowance(userAddress, MULTISWAP_ADDRESS)).lt(amtB)) { await (await cB.approve(MULTISWAP_ADDRESS, MAX_UINT)).wait(); }
+
+                const swap = new ethers.Contract(MULTISWAP_ADDRESS, SWAP_ABI, signer);
+                const tx = await swap.addLiquidity(TOKENS[a].address, TOKENS[b].address, amtA, amtB);
+                await tx.wait();
+                alert("Liquidity Added Successfully!");
+                document.getElementById('liqAmountA').value = "";
+                document.getElementById('liqAmountB').value = "";
+                await refreshBalances();
+                liqBtn.disabled = false; liqBtn.innerText = "ADD LIQUIDITY";
+            } catch(e) { alert("Adding Liquidity Failed!"); liqBtn.disabled = false; liqBtn.innerText = "ADD LIQUIDITY"; }
+        }
+
         // --- OMNITRIX DIAL LOGIC ---
         const body = document.body;
         const projector = document.getElementById('projector');
         const pText = document.getElementById('p-text');
         const flash = document.getElementById('flash');
         const swapTerminal = document.getElementById('swap-terminal');
+        const poolTerminal = document.getElementById('pool-terminal');
         const faucetTerminal = document.getElementById('faucet-terminal');
         
         const dialRing = document.getElementById('dial-ring');
@@ -394,6 +502,9 @@
                 body.classList.add('terminal-active');
                 if (activeIndex === 0) {
                     swapTerminal.classList.add('open');
+                } else if (activeIndex === 1) {
+                    poolTerminal.classList.add('open');
+                    renderLiquidityPanel();
                 } else if (activeIndex === 4) {
                     faucetTerminal.classList.add('open');
                 } else {
@@ -405,6 +516,7 @@
 
         window.closeTerminals = function() {
             swapTerminal.classList.remove('open');
+            poolTerminal.classList.remove('open');
             faucetTerminal.classList.remove('open');
             body.classList.remove('terminal-active');
             isOn = false; body.classList.remove('is-on');
