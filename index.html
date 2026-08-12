@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TrixSwap - Alien X Cosmic Terminal</title>
+    <title>TrixSwap - Ultimate Omnitrix Sound FX</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
     
@@ -21,7 +21,6 @@
             z-index: -2; pointer-events: none; background: #010204; overflow: hidden;
         }
         
-        /* Deep space starfield + swirling nebula simulation */
         .nebula-swirl {
             position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
             background: radial-gradient(circle, rgba(100,0,255,0.15) 0%, rgba(0,255,150,0.08) 30%, rgba(0,0,0,0.95) 70%);
@@ -32,7 +31,6 @@
             100% { transform: rotate(360deg); }
         }
 
-        /* White floating stars (Alien X space body texture) */
         .star {
             position: absolute; background: #ffffff; border-radius: 50%;
             animation: starTwinkle var(--duration) infinite ease-in-out alternate;
@@ -168,10 +166,8 @@
 </head>
 <body>
 
-    <!-- ALIEN X COSMIC BODY BACKGROUND -->
     <div class="alienx-layer">
         <div class="nebula-swirl"></div>
-        <!-- Dynamic Stars Generated via JS -->
     </div>
     <div class="bg-grid"></div>
 
@@ -316,7 +312,6 @@
     <div class="flash" id="flash"></div>
 
     <script>
-        // --- GENERATE ALIEN X COSMIC STARS ---
         const alienLayer = document.querySelector('.alienx-layer');
         for (let i = 0; i < 70; i++) {
             const star = document.createElement('div');
@@ -331,18 +326,91 @@
             alienLayer.appendChild(star);
         }
 
+        // --- AUTHENTIC BEN 10 OMNITRIX WEB AUDIO FX ---
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        // 1. WATCH ON / POWER UP SOUND (High-tech energy surge)
+        function playWatchOnSound() {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const now = audioCtx.currentTime;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(150, now);
+            osc.frequency.exponentialRampToValueAtTime(1200, now + 0.4);
+            
+            gain.gain.setValueAtTime(0.12, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.45);
+            
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start(now);
+            osc.stop(now + 0.45);
+        }
+
+        // 2. DIAL SCROLL / ALIEN SWITCH SOUND (Classic mechanical gear + laser click)
         function playTickSound() {
             if (audioCtx.state === 'suspended') audioCtx.resume();
+            const now = audioCtx.currentTime;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(900, now);
+            osc.frequency.exponentialRampToValueAtTime(300, now + 0.05);
+            
+            gain.gain.setValueAtTime(0.1, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.06);
+            
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start(now);
+            osc.stop(now + 0.06);
+        }
+
+        // 3. WATCH STAMP / SLAM SOUND (Heavy metal lock + energy shockwave boom)
+        function playSlamSound() {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const now = audioCtx.currentTime;
+            
+            // Sub-bass impact
             const osc = audioCtx.createOscillator();
             const gain = audioCtx.createGain();
             osc.type = 'sine';
-            osc.frequency.setValueAtTime(800, audioCtx.currentTime);
-            osc.frequency.exponentialRampToValueAtTime(400, audioCtx.currentTime + 0.04);
-            osc.connect(gain); gain.connect(audioCtx.destination);
-            gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.04);
-            osc.start(); osc.stop(audioCtx.currentTime + 0.04);
+            osc.frequency.setValueAtTime(250, now);
+            osc.frequency.exponentialRampToValueAtTime(40, now + 0.3);
+            
+            gain.gain.setValueAtTime(0.3, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+            
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start(now);
+            osc.stop(now + 0.35);
+
+            // Metallic clang overlay
+            const noiseNode = audioCtx.createBufferSource();
+            const bufferSize = audioCtx.sampleRate * 0.2;
+            const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+            const data = buffer.getChannelData(0);
+            for (let i = 0; i < bufferSize; i++) {
+                data[i] = Math.random() * 2 - 1;
+            }
+            noiseNode.buffer = buffer;
+            const filter = audioCtx.createBiquadFilter();
+            filter.type = 'bandpass';
+            filter.frequency.value = 1000;
+            
+            const noiseGain = audioCtx.createGain();
+            noiseGain.gain.setValueAtTime(0.15, now);
+            noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
+
+            noiseNode.connect(filter);
+            filter.connect(noiseGain);
+            noiseGain.connect(audioCtx.destination);
+            noiseNode.start(now);
+            noiseNode.stop(now + 0.2);
         }
 
         const MULTISWAP_ADDRESS = "0xC71b9D161780AbA17D60b86D5d2Fb07F98DD5279";
@@ -752,6 +820,7 @@
 
         window.executeSelection = function() {
             if (!isOn) return;
+            playSlamSound(); // 3. WATCH STAMP / SLAM SOUND WHEN CLICKING CENTER
             flash.classList.add('fire');
             
             setTimeout(() => {
@@ -783,7 +852,6 @@
             lendTerminal.classList.remove('open');
             borrowTerminal.classList.remove('open');
             faucetTerminal.classList.remove('open');
-            body.classList.add('terminal-active'); // wait, keep it clean:
             body.classList.remove('terminal-active');
             isOn = false; body.classList.remove('is-on');
             pText.innerText = "TAP TO INITIALIZE";
@@ -791,7 +859,10 @@
 
         projector.addEventListener('click', () => {
             if (!isOn) { 
-                isOn = true; body.classList.add('is-on'); pText.innerText = "SCROLL TO ROTATE | TAP CENTER"; 
+                isOn = true; 
+                playWatchOnSound(); // 1. WATCH ON / POWER UP SOUND
+                body.classList.add('is-on'); 
+                pText.innerText = "SCROLL TO ROTATE | TAP CENTER"; 
                 updateDialUI(); 
             } else { 
                 executeSelection(); 
@@ -800,7 +871,7 @@
 
         window.addEventListener('wheel', (e) => {
             if (isOn && !body.classList.contains('terminal-active')) {
-                playTickSound();
+                playTickSound(); // 2. DIAL SCROLL / ALIEN SWITCH SOUND
                 if (e.deltaY > 0) {
                     currentRotation -= 60;
                     activeIndex = (activeIndex + 1) % 6;
