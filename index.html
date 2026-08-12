@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TrixSwap - Omniverse Terminal</title>
+    <title>TrixSwap - ARC Network Terminal</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
-    <!-- Ethers.js library for Wallet Connection -->
+    <!-- Ethers.js library for Web3 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
     
     <style>
@@ -62,7 +62,7 @@
         body.is-on .beam { opacity: 1; }
         body.is-on .bg-title { opacity: 0.15; }
 
-        /* --- THE NEW SWAP TERMINAL UI --- */
+        /* --- THE SWAP TERMINAL UI --- */
         .swap-terminal {
             position: absolute; top: 45%; left: 50%;
             transform: translate(-50%, -50%) scale(0.8);
@@ -84,15 +84,12 @@
         .swap-label { display: block; font-size: 12px; color: #888; margin-bottom: 8px; }
         .swap-row { display: flex; justify-content: space-between; align-items: center; }
         
-        /* Inputs */
         .swap-row input { background: transparent; border: none; color: #fff; font-size: 28px; width: 60%; font-family: 'Share Tech Mono', monospace; outline: none; }
         .swap-row input::placeholder { color: rgba(255,255,255,0.2); }
         
-        /* Crypto Dropdowns */
         .swap-row select { background: rgba(0,255,102,0.1); color: var(--theme-color); border: 1px solid var(--theme-color); padding: 8px 12px; border-radius: 8px; font-weight: bold; font-family: 'Orbitron', sans-serif; outline: none; cursor: pointer; font-size: 14px; }
         .swap-row select option { background: #111; color: #fff; }
 
-        /* The Swap Icon in middle */
         .swap-arrow { position: absolute; left: 50%; bottom: -20px; transform: translateX(-50%); width: 30px; height: 30px; background: #111; border: 1px solid var(--theme-color); border-radius: 50%; display: flex; justify-content: center; align-items: center; color: var(--theme-color); font-weight: bold; z-index: 10; font-family: 'Orbitron', sans-serif; cursor: pointer; }
 
         .execute-btn { width: 100%; padding: 18px; background: var(--theme-color); color: #000; border: none; border-radius: 10px; font-size: 16px; font-weight: 900; font-family: 'Orbitron', sans-serif; cursor: pointer; margin-top: 15px; transition: 0.3s; box-shadow: 0 0 15px rgba(0,255,102,0.4); }
@@ -101,12 +98,11 @@
         .close-btn { position: absolute; top: 15px; right: 15px; background: transparent; color: #aaa; border: none; cursor: pointer; font-size: 20px; transition: color 0.2s; }
         .close-btn:hover { color: #fff; }
 
-        /* --- PLASMA FLASH --- */
+        /* --- FLASH --- */
         .flash { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: var(--theme-color); opacity: 0; pointer-events: none; z-index: 999; }
         .flash.fire { animation: slamFlash 0.5s ease-out; }
         @keyframes slamFlash { 0% { opacity: 0; } 10% { opacity: 1; } 100% { opacity: 0; } }
 
-        /* Hide elements when terminal is open */
         body.terminal-active .scene, body.terminal-active .beam, body.terminal-active .projector-wrap { opacity: 0; pointer-events: none; }
     </style>
 </head>
@@ -136,19 +132,19 @@
         <div class="projector-text" id="p-text">TAP TO INITIALIZE</div>
     </div>
 
-    <!-- NEW SWAP TERMINAL -->
+    <!-- SWAP TERMINAL -->
     <div class="swap-terminal" id="swap-terminal">
         <button class="close-btn" id="close-terminal">✖</button>
-        <div class="terminal-header">ROUTING PROTOCOL</div>
+        <div class="terminal-header">ARC ROUTING PROTOCOL</div>
         
         <div class="swap-box">
             <span class="swap-label">YOU PAY</span>
             <div class="swap-row">
                 <input type="number" placeholder="0.0" id="pay-input">
                 <select id="pay-token">
+                    <option value="ARC">ARC</option>
                     <option value="AVAX">AVAX</option>
                     <option value="ETH">ETH</option>
-                    <option value="BTC">BTC</option>
                     <option value="USDC">USDC</option>
                 </select>
             </div>
@@ -163,7 +159,7 @@
                     <option value="USDC">USDC</option>
                     <option value="USDT">USDT</option>
                     <option value="ETH">ETH</option>
-                    <option value="AVAX">AVAX</option>
+                    <option value="ARC">ARC</option>
                 </select>
             </div>
         </div>
@@ -174,6 +170,19 @@
     <div class="flash" id="flash"></div>
 
     <script>
+        // --- ARC NETWORK CONFIGURATION ---
+        const arcNetwork = {
+            chainId: '0x221', // Example ARC chain ID (Update with real one if needed)
+            chainName: 'ARC Network',
+            rpcUrls: ['https://rpc.arc.network'], // Ensure this matches actual ARC RPC
+            nativeCurrency: {
+                name: 'ARC',
+                symbol: 'ARC',
+                decimals: 18
+            },
+            blockExplorerUrls: ['https://explorer.arc.network']
+        };
+
         // --- WEB3 WALLET LOGIC ---
         const walletBtn = document.getElementById('wallet-btn');
         const walletAddressText = document.getElementById('wallet-address');
@@ -185,18 +194,47 @@
                     walletAddressText.innerText = "CONNECTING...";
                     const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
                     userAddress = accounts[0];
+
+                    // FORCE SWITCH TO ARC NETWORK
+                    try {
+                        await window.ethereum.request({
+                            method: 'wallet_switchEthereumChain',
+                            params: [{ chainId: arcNetwork.chainId }],
+                        });
+                    } catch (switchError) {
+                        if (switchError.code === 4902) {
+                            try {
+                                await window.ethereum.request({
+                                    method: 'wallet_addEthereumChain',
+                                    params: [arcNetwork],
+                                });
+                            } catch (addError) {
+                                console.error("Failed to add ARC", addError);
+                                walletAddressText.innerText = "NETWORK ERROR";
+                                setTimeout(() => walletAddressText.innerText = "CONNECT WALLET", 2000);
+                                return;
+                            }
+                        } else {
+                            console.error("Switch rejected", switchError);
+                            walletAddressText.innerText = "NETWORK REJECTED";
+                            setTimeout(() => walletAddressText.innerText = "CONNECT WALLET", 2000);
+                            return;
+                        }
+                    }
+
+                    // Success
                     walletBtn.classList.add('connected');
                     walletAddressText.innerText = userAddress.slice(0, 6) + "..." + userAddress.slice(-4);
                 } catch (error) {
-                    walletAddressText.innerText = "CONNECTION FAILED";
+                    walletAddressText.innerText = "FAILED";
                     setTimeout(() => walletAddressText.innerText = "CONNECT WALLET", 2000);
                 }
             } else {
-                alert("No Web3 Wallet detected!");
+                alert("No Web3 Wallet detected! Please install MetaMask or Core Wallet.");
             }
         }
+        
         walletBtn.addEventListener('click', () => { if (!userAddress) connectWallet(); });
-
 
         // --- UI STATE MANAGEMENT ---
         const body = document.body;
@@ -205,7 +243,6 @@
         const pText = document.getElementById('p-text');
         const flash = document.getElementById('flash');
         
-        // Terminal Elements
         const swapTerminal = document.getElementById('swap-terminal');
         const closeTerminalBtn = document.getElementById('close-terminal');
         const executeSwapBtn = document.getElementById('execute-swap-btn');
@@ -213,7 +250,6 @@
         let isOn = false; let rotationY = 0; let activeIndex = 0;
         const colors = ["#00ff66", "#00d4ff", "#b100ff", "#ffea00"];
 
-        // Audio System
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         function playBeep(freq, duration) {
             if(audioCtx.state === 'suspended') audioCtx.resume();
@@ -235,22 +271,18 @@
             document.documentElement.style.setProperty('--theme-color', colors[activeIndex]);
         }
 
-        // TRIGGER THE TERMINAL ON "SLAM"
         function executeSelection() {
-            if (!userAddress) { alert("Access Denied: Please Connect Wallet First."); return; }
+            if (!userAddress) { alert("Access Denied: Please Connect Wallet & Switch to ARC Network."); return; }
             
             playBeep(300, 0.4);
             flash.classList.add('fire');
             
             setTimeout(() => {
                 flash.classList.remove('fire');
-                
-                // If "SWAP" (index 0) is selected, open the terminal
                 if (activeIndex === 0) {
                     body.classList.add('terminal-active');
                     swapTerminal.classList.add('open');
                 } else {
-                    // For other options, just reset for now
                     isOn = false;
                     body.classList.remove('is-on');
                     pText.innerText = "TAP TO INITIALIZE";
@@ -258,7 +290,6 @@
             }, 150);
         }
 
-        // Projector click
         projector.addEventListener('click', () => {
             if (!isOn) {
                 isOn = true; body.classList.add('is-on'); pText.innerText = "SCROLL MOUSE | TAP TO EXECUTE";
@@ -268,16 +299,13 @@
             }
         });
 
-        // Click direct on hologram item
         document.querySelectorAll('.holo-item').forEach((item, index) => {
             item.addEventListener('click', (e) => {
                 e.stopPropagation(); if (isOn && index === activeIndex) executeSelection();
             });
         });
 
-        // Mouse Wheel scrolling
         window.addEventListener('wheel', (e) => {
-            // Prevent scrolling rotation if the terminal is open
             if (isOn && !body.classList.contains('terminal-active')) {
                 playBeep(1200, 0.05);
                 if (e.deltaY > 0) { rotationY -= 90; activeIndex = (activeIndex + 1) % 4; } 
@@ -287,31 +315,27 @@
             }
         });
 
-        // Close Terminal Button
         closeTerminalBtn.addEventListener('click', () => {
             swapTerminal.classList.remove('open');
             body.classList.remove('terminal-active');
-            isOn = false;
-            body.classList.remove('is-on');
+            isOn = false; body.classList.remove('is-on');
             pText.innerText = "TAP TO INITIALIZE";
             playBeep(150, 0.3);
         });
 
-        // Execute Final Transaction from Terminal
         executeSwapBtn.addEventListener('click', () => {
             if(!document.getElementById('pay-input').value) {
                 alert("Please enter an amount to swap!");
                 return;
             }
-            executeSwapBtn.innerText = "PROCESSING ON-CHAIN...";
+            executeSwapBtn.innerText = "PROCESSING ON ARC NETWORK...";
             executeSwapBtn.style.background = "#fff";
             
-            // Mock transaction delay
             setTimeout(() => {
-                alert("Transaction Sent to Network Successfully!");
+                alert("ARC Transaction Confirmed!");
                 executeSwapBtn.innerText = "CONFIRM TRANSACTION";
                 executeSwapBtn.style.background = "var(--theme-color)";
-                closeTerminalBtn.click(); // Close terminal after success
+                closeTerminalBtn.click();
             }, 2000);
         });
     </script>
