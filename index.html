@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TrixSwap - Omnitrix Dial UI</title>
+    <title>TrixSwap - Omnitrix Dial Terminal</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
     
@@ -36,7 +36,7 @@
         .projector-text { margin-top: 12px; color: var(--theme-color); font-size: 12px; letter-spacing: 4px; }
         .beam { position: absolute; bottom: 60px; width: 350px; height: 400px; background: linear-gradient(to top, rgba(255,255,255,0.1), transparent); clip-path: polygon(50% 100%, 0 0, 100% 0); opacity: 0; transform-origin: bottom center; transition: opacity 0.5s; pointer-events: none; }
 
-        /* --- FIXED OMNITRIX DIAL UI --- */
+        /* --- OMNITRIX DIAL UI --- */
         .dial-wrapper {
             position: absolute; top: 42%; left: 50%;
             transform: translate(-50%, -50%) scale(0.5);
@@ -45,12 +45,8 @@
             transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
-        body.is-on .dial-wrapper {
-            opacity: 1; pointer-events: auto;
-            transform: translate(-50%, -50%) scale(1);
-        }
+        body.is-on .dial-wrapper { opacity: 1; pointer-events: auto; transform: translate(-50%, -50%) scale(1); }
 
-        /* Top Indicator Arrow */
         .dial-selector {
             position: absolute; top: -28px; left: 50%; transform: translateX(-50%);
             width: 0; height: 0; border-left: 14px solid transparent; border-right: 14px solid transparent;
@@ -58,42 +54,30 @@
             filter: drop-shadow(0 -4px 8px var(--theme-color));
         }
 
-        /* The Ring Body */
         .dial-ring {
-            width: 100%; height: 100%; border-radius: 50%;
-            border: 35px solid rgba(0, 255, 102, 0.15);
-            position: absolute; top: 0; left: 0;
-            transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
-            box-shadow: 0 0 40px rgba(0,255,102,0.2), inset 0 0 40px rgba(0,255,102,0.2);
-            box-sizing: border-box;
+            width: 100%; height: 100%; border-radius: 50%; border: 35px solid rgba(0, 255, 102, 0.15);
+            position: absolute; top: 0; left: 0; transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+            box-shadow: 0 0 40px rgba(0,255,102,0.2), inset 0 0 40px rgba(0,255,102,0.2); box-sizing: border-box;
         }
 
-        /* Center Dynamic Text */
         .dial-center-text {
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            font-size: 26px; font-weight: 900; color: var(--theme-color);
-            letter-spacing: 3px; text-shadow: 0 0 15px var(--theme-color);
-            text-align: center; cursor: pointer;
-            width: 130px; height: 130px;
-            background: rgba(2, 5, 2, 0.9); border-radius: 50%;
-            display: flex; justify-content: center; align-items: center;
-            border: 2px solid var(--theme-color);
+            font-size: 24px; font-weight: 900; color: var(--theme-color); letter-spacing: 3px;
+            text-shadow: 0 0 15px var(--theme-color); text-align: center; cursor: pointer;
+            width: 130px; height: 130px; background: rgba(2, 5, 2, 0.95); border-radius: 50%;
+            display: flex; justify-content: center; align-items: center; border: 2px solid var(--theme-color);
             box-shadow: inset 0 0 20px rgba(0,255,102,0.2), 0 0 20px rgba(0,255,102,0.2);
             transition: 0.3s; z-index: 10;
         }
         .dial-center-text:hover { background: rgba(0, 255, 102, 0.15); transform: translate(-50%, -50%) scale(1.05); }
 
-        /* The 6 Option Icons perfectly aligned on the ring border */
         .dial-item {
             position: absolute; top: 50%; left: 50%; width: 44px; height: 44px;
-            margin-top: -22px; margin-left: -22px;
-            background: #0b1a0f; border: 2px solid var(--theme-color); border-radius: 50%;
-            display: flex; justify-content: center; align-items: center; font-size: 20px;
-            box-shadow: 0 0 12px var(--theme-color); color: #fff;
-            transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+            margin-top: -22px; margin-left: -22px; background: #0b1a0f; border: 2px solid var(--theme-color);
+            border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 20px;
+            box-shadow: 0 0 12px var(--theme-color); color: #fff; transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
         }
 
-        /* Precise Radius Placement (Radius = 118px so they sit right in the middle of the 35px border) */
         .item-0 { transform: rotate(0deg) translateY(-118px) rotate(0deg); }   /* SWAP */
         .item-1 { transform: rotate(60deg) translateY(-118px) rotate(-60deg); }  /* POOL */
         .item-2 { transform: rotate(120deg) translateY(-118px) rotate(-120deg); } /* LEND */
@@ -104,45 +88,44 @@
         body.is-on .beam { opacity: 1; }
         body.is-on .bg-title { opacity: 0.15; }
 
-        /* --- SWAP TERMINAL UI --- */
-        .swap-terminal {
+        /* --- COMMON TERMINAL STYLES --- -->
+        .terminal-box {
             position: absolute; top: 45%; left: 50%; transform: translate(-50%, -50%) scale(0.8);
             width: 380px; background: rgba(5, 15, 5, 0.95); border: 2px solid var(--theme-color);
             box-shadow: 0 0 30px rgba(0,255,102,0.2), inset 0 0 20px rgba(0,255,102,0.1);
             border-radius: 15px; padding: 25px; z-index: 200; opacity: 0; pointer-events: none;
             transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            font-family: 'Share Tech Mono', monospace; backdrop-filter: blur(10px);
+            font-family: 'Share Tech Mono', monospace; backdrop-filter: blur(10px); color: #fff;
         }
-
-        .swap-terminal.open { transform: translate(-50%, -50%) scale(1); opacity: 1; pointer-events: auto; }
-        .terminal-header { text-align: center; font-size: 20px; font-family: 'Orbitron', sans-serif; font-weight: 900; color: var(--theme-color); letter-spacing: 3px; margin-bottom: 20px; text-shadow: 0 0 10px var(--theme-color); }
-        
-        .swap-box { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 15px; margin-bottom: 15px; position: relative; }
-        
-        .swap-label-row { display: flex; justify-content: space-between; font-size: 12px; color: #aaa; margin-bottom: 8px; }
-        .max-btn { background: rgba(0,255,102,0.2); border: 1px solid var(--theme-color); color: var(--theme-color); border-radius: 4px; padding: 2px 6px; cursor: pointer; font-family: 'Orbitron', sans-serif; font-size: 10px; margin-left: 10px; transition: 0.2s;}
-        .max-btn:hover { background: var(--theme-color); color: #000; }
-
-        .swap-row { display: flex; justify-content: space-between; align-items: center; }
-        .swap-row input { background: transparent; border: none; color: #fff; font-size: 26px; width: 60%; font-family: 'Share Tech Mono', monospace; outline: none; }
-        .swap-row input::placeholder { color: rgba(255,255,255,0.2); }
-        .swap-row select { background: rgba(0,255,102,0.1); color: var(--theme-color); border: 1px solid var(--theme-color); padding: 8px; border-radius: 8px; font-weight: bold; font-family: 'Orbitron', sans-serif; outline: none; cursor: pointer; }
-        .swap-row select option { background: #111; color: #fff; }
-
-        .swap-arrow { position: absolute; left: 50%; bottom: -20px; transform: translateX(-50%); width: 30px; height: 30px; background: #111; border: 1px solid var(--theme-color); border-radius: 50%; display: flex; justify-content: center; align-items: center; color: var(--theme-color); z-index: 10; font-family: 'Orbitron', sans-serif; cursor: pointer; }
-
-        .price-impact { font-size: 12px; color: #888; text-align: center; margin-top: -5px; margin-bottom: 10px; min-height: 15px;}
-        
-        .execute-btn { width: 100%; padding: 18px; background: var(--theme-color); color: #000; border: none; border-radius: 10px; font-size: 16px; font-weight: 900; font-family: 'Orbitron', sans-serif; cursor: pointer; transition: 0.3s; box-shadow: 0 0 15px rgba(0,255,102,0.4); }
-        .execute-btn:hover { box-shadow: 0 0 25px var(--theme-color); transform: translateY(-2px); }
-        .execute-btn.warn { background: transparent; border: 2px solid #ffea00; color: #ffea00; box-shadow: 0 0 15px rgba(255, 234, 0, 0.4); }
-
+        .terminal-box.open { transform: translate(-50%, -50%) scale(1); opacity: 1; pointer-events: auto; }
+        .terminal-header { text-align: center; font-size: 18px; font-family: 'Orbitron', sans-serif; font-weight: 900; color: var(--theme-color); letter-spacing: 2px; margin-bottom: 20px; text-shadow: 0 0 10px var(--theme-color); }
         .close-btn { position: absolute; top: 15px; right: 15px; background: transparent; color: #aaa; border: none; cursor: pointer; font-size: 20px; }
         .close-btn:hover { color: #fff; }
+
+        /* Swap Specifics */
+        .swap-box { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 15px; margin-bottom: 15px; position: relative; }
+        .swap-label-row { display: flex; justify-content: space-between; font-size: 12px; color: #aaa; margin-bottom: 8px; }
+        .max-btn { background: rgba(0,255,102,0.2); border: 1px solid var(--theme-color); color: var(--theme-color); border-radius: 4px; padding: 2px 6px; cursor: pointer; font-family: 'Orbitron', sans-serif; font-size: 10px; margin-left: 10px; }
+        .swap-row { display: flex; justify-content: space-between; align-items: center; }
+        .swap-row input { background: transparent; border: none; color: #fff; font-size: 26px; width: 60%; font-family: 'Share Tech Mono', monospace; outline: none; }
+        .swap-row select { background: rgba(0,255,102,0.1); color: var(--theme-color); border: 1px solid var(--theme-color); padding: 8px; border-radius: 8px; font-weight: bold; font-family: 'Orbitron', sans-serif; outline: none; cursor: pointer; }
+        .swap-arrow { position: absolute; left: 50%; bottom: -20px; transform: translateX(-50%); width: 30px; height: 30px; background: #111; border: 1px solid var(--theme-color); border-radius: 50%; display: flex; justify-content: center; align-items: center; color: var(--theme-color); z-index: 10; cursor: pointer; }
+        .price-impact { font-size: 12px; color: #888; text-align: center; margin-top: -5px; margin-bottom: 10px; min-height: 15px; }
+        
+        .execute-btn { width: 100%; padding: 16px; background: var(--theme-color); color: #000; border: none; border-radius: 10px; font-size: 15px; font-weight: 900; font-family: 'Orbitron', sans-serif; cursor: pointer; transition: 0.3s; box-shadow: 0 0 15px rgba(0,255,102,0.4); text-align: center; display: block; text-decoration: none; }
+        .execute-btn:hover { box-shadow: 0 0 25px var(--theme-color); }
+        .execute-btn.warn { background: transparent; border: 2px solid #ffea00; color: #ffea00; }
+
+        /* Faucet Specifics */
+        .faucet-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 15px; margin-bottom: 12px; }
+        .faucet-title { font-size: 14px; font-weight: bold; color: #fff; margin-bottom: 6px; display: flex; align-items: center; gap: 8px; }
+        .faucet-desc { font-size: 12px; color: #aaa; margin-bottom: 12px; line-height: 1.4; }
+        .faucet-note { font-size: 11px; color: #ffea00; background: rgba(255,234,0,0.08); padding: 10px; border-radius: 8px; border: 1px solid rgba(255,234,0,0.2); line-height: 1.4; }
 
         .flash { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: var(--theme-color); opacity: 0; pointer-events: none; z-index: 999; }
         .flash.fire { animation: slamFlash 0.5s ease-out; }
         @keyframes slamFlash { 0% { opacity: 0; } 10% { opacity: 1; } 100% { opacity: 0; } }
+        
         body.terminal-active .dial-wrapper, body.terminal-active .beam, body.terminal-active .projector-wrap { opacity: 0; pointer-events: none; }
     </style>
 </head>
@@ -161,14 +144,13 @@
     <div class="dial-wrapper" id="dial-wrapper">
         <div class="dial-selector"></div>
         <div class="dial-ring" id="dial-ring">
-            <div class="dial-item item-0">⇆</div> <!-- Swap -->
-            <div class="dial-item item-1">💧</div> <!-- Pool -->
-            <div class="dial-item item-2">🏦</div> <!-- Lend -->
-            <div class="dial-item item-3">💸</div> <!-- Borrow -->
-            <div class="dial-item item-4">🚰</div> <!-- Faucet -->
-            <div class="dial-item item-5">ℹ️</div> <!-- About -->
+            <div class="dial-item item-0">⇆</div>
+            <div class="dial-item item-1">💧</div>
+            <div class="dial-item item-2">🏦</div>
+            <div class="dial-item item-3">💸</div>
+            <div class="dial-item item-4">🚰</div>
+            <div class="dial-item item-5">ℹ️</div>
         </div>
-        <!-- CENTER TEXT -->
         <div class="dial-center-text" id="center-text" onclick="executeSelection()">SWAP</div>
     </div>
 
@@ -177,11 +159,10 @@
         <div class="projector-text" id="p-text">TAP TO INITIALIZE</div>
     </div>
 
-    <!-- ADVANCED SWAP TERMINAL -->
-    <div class="swap-terminal" id="swap-terminal">
-        <button class="close-btn" id="close-terminal">✖</button>
+    <!-- SWAP TERMINAL -->
+    <div class="terminal-box" id="swap-terminal">
+        <button class="close-btn" onclick="closeTerminals()">✖</button>
         <div class="terminal-header">ARC ROUTING PROTOCOL</div>
-        
         <div class="swap-box">
             <div class="swap-label-row">
                 <span>YOU PAY</span>
@@ -197,7 +178,6 @@
             </div>
             <div class="swap-arrow" id="flip-btn">↕</div>
         </div>
-
         <div class="swap-box" style="margin-top: -5px;">
             <div class="swap-label-row">
                 <span>YOU RECEIVE</span>
@@ -212,15 +192,51 @@
                 </select>
             </div>
         </div>
-
         <div class="price-impact" id="rateLine"></div>
-
         <button class="execute-btn" id="execute-swap-btn">CONNECT WALLET</button>
+    </div>
+
+    <!-- FAUCET TERMINAL -->
+    <div class="terminal-box" id="faucet-terminal">
+        <button class="close-btn" onclick="closeTerminals()">✖</button>
+        <div class="terminal-header">GET TESTNET ASSETS</div>
+        
+        <div class="faucet-card">
+            <div class="faucet-title"><span style="background:var(--theme-color); color:#000; width:18px; height:18px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:11px;">1</span> Add Arc Testnet</div>
+            <div class="faucet-desc">Adds the Arc Testnet network to your wallet automatically.</div>
+            <button class="execute-btn" onclick="connectWallet()">Add Arc Testnet to Wallet</button>
+        </div>
+
+        <div class="faucet-card">
+            <div class="faucet-title"><span style="background:var(--theme-color); color:#000; width:18px; height:18px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:11px;">2</span> Claim Test Tokens</div>
+            <div class="faucet-desc">Get free testnet USDC and EURC from Circle's official faucet.</div>
+            <a href="https://faucet.circle.com/" target="_blank" class="execute-btn" style="background: transparent; border: 1px solid var(--theme-color); color: #fff;">Open Circle Faucet ↗</a>
+        </div>
+
+        <div class="faucet-note">
+            cirBTC does not have a public faucet yet. If you need it for testing, reach out via links in the About tab.
+        </div>
     </div>
 
     <div class="flash" id="flash"></div>
 
     <script>
+        // --- AUDIO TICK SOUND SETUP ---
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playTickSound() {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(400, audioCtx.currentTime + 0.04);
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.04);
+            osc.start(); osc.stop(audioCtx.currentTime + 0.04);
+        }
+
+        // --- SMART CONTRACT DATA ---
         const MULTISWAP_ADDRESS = "0xC71b9D161780AbA17D60b86D5d2Fb07F98DD5279";
         const ARC_CHAIN_HEX = "0x4ced5a"; 
         const MAX_UINT = ethers.constants.MaxUint256;
@@ -340,12 +356,13 @@
             } catch(e) { updateActionState(); alert("Swap Failed!"); }
         }
 
+        // --- OMNITRIX DIAL LOGIC ---
         const body = document.body;
         const projector = document.getElementById('projector');
         const pText = document.getElementById('p-text');
         const flash = document.getElementById('flash');
         const swapTerminal = document.getElementById('swap-terminal');
-        const closeTerminalBtn = document.getElementById('close-terminal');
+        const faucetTerminal = document.getElementById('faucet-terminal');
         
         const dialRing = document.getElementById('dial-ring');
         const centerText = document.getElementById('center-text');
@@ -359,14 +376,11 @@
 
         function updateDialUI() {
             dialRing.style.transform = `rotate(${currentRotation}deg)`;
-            
-            // Fix icons counter-rotation so they remain straight upright while ring rotates
             const items = document.querySelectorAll('.dial-item');
             items.forEach((item, idx) => {
                 const baseAngle = idx * 60;
                 item.style.transform = `rotate(${baseAngle}deg) translateY(-118px) rotate(${-currentRotation - baseAngle}deg)`;
             });
-
             centerText.innerText = options[activeIndex];
             document.documentElement.style.setProperty('--theme-color', colors[activeIndex]);
         }
@@ -377,14 +391,24 @@
             
             setTimeout(() => {
                 flash.classList.remove('fire');
+                body.classList.add('terminal-active');
                 if (activeIndex === 0) {
-                    body.classList.add('terminal-active'); 
                     swapTerminal.classList.add('open');
+                } else if (activeIndex === 4) {
+                    faucetTerminal.classList.add('open');
                 } else {
                     alert(options[activeIndex] + " Protocol is currently locked.");
-                    isOn = false; body.classList.remove('is-on'); pText.innerText = "TAP TO INITIALIZE";
+                    closeTerminals();
                 }
             }, 150);
+        }
+
+        window.closeTerminals = function() {
+            swapTerminal.classList.remove('open');
+            faucetTerminal.classList.remove('open');
+            body.classList.remove('terminal-active');
+            isOn = false; body.classList.remove('is-on');
+            pText.innerText = "TAP TO INITIALIZE";
         }
 
         projector.addEventListener('click', () => {
@@ -398,6 +422,7 @@
 
         window.addEventListener('wheel', (e) => {
             if (isOn && !body.classList.contains('terminal-active')) {
+                playTickSound(); // Play Sci-Fi Tick Sound on scroll rotation
                 if (e.deltaY > 0) {
                     currentRotation -= 60;
                     activeIndex = (activeIndex + 1) % 6;
@@ -407,11 +432,6 @@
                 }
                 updateDialUI();
             }
-        });
-
-        closeTerminalBtn.addEventListener('click', () => {
-            swapTerminal.classList.remove('open'); body.classList.remove('terminal-active');
-            isOn = false; body.classList.remove('is-on'); pText.innerText = "TAP TO INITIALIZE";
         });
     </script>
 </body>
